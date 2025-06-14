@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 
 cors();
-verify_method('POST');
+verify_method(array('PUT'));
 $payload = authenticate();
 header('Content-Type: application/json');
 

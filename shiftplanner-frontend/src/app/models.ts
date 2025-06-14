@@ -9,6 +9,11 @@ export interface User {
   role?: string;
 }
 
+export interface ApprovedUser {
+  email: string;
+  isAdmin: boolean;
+}
+
 export interface ShiftOption {
   id: string;
   label: string;

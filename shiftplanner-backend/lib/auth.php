@@ -47,12 +47,14 @@ function validate_jwt($jwt)
     return $payload_data;
 }
 
-function verify_method($allowed_method) {
-    if ($_SERVER['REQUEST_METHOD'] !== $allowed_method) {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
-    exit;
-}
+function verify_method(array $allowed_methods) {
+    $method = $_SERVER['REQUEST_METHOD'];
+    if (!in_array($method, $allowed_methods)) {
+        http_response_code(405);
+        echo json_encode(['error' => 'Method not allowed']);
+        exit;
+    }
+    return $method;
 }
 
 function authenticate() {
@@ -62,5 +64,11 @@ function authenticate() {
         echo json_encode(['error' => 'Unauthorized']);
         exit;
     }
-    return validate_jwt($token);
+    $token_payload = validate_jwt($token);
+    if ($token_payload === null) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Invalid token']);
+        exit;
+    }
+    return $token_payload;
 }

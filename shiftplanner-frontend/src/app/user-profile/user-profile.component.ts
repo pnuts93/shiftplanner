@@ -113,7 +113,7 @@ export class UserProfileComponent implements OnInit {
     if (this.profileForm.valid) {
       const updatedProfile = this.profileForm.value;
       fetch(environment.hostname + '/api/profile/update.php', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,

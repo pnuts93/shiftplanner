@@ -25,15 +25,16 @@
       </button>
     </form>
 
-    <mat-divider class="my-3"></mat-divider>
+    <mat-divider></mat-divider>
 
-    <div *ngIf="allowedUsers.length; else noUsers">
+    <div *ngIf="allowedUsers$ | async as allowedUsers; else noUsers">
       <div class="user-list-item" *ngFor="let user of allowedUsers">
         <p class="user-email" matListItemTitle>{{ user.email }}</p>
 
         <mat-slide-toggle
           [(ngModel)]="user.isAdmin"
           (change)="toggleAdmin(user)"
+          [disabled]="!canBeRemoved(user)"
           class="admin-toggle"
           ngDefaultControl
           matListItemLine
@@ -41,7 +42,7 @@
           Admin
         </mat-slide-toggle>
 
-        <button class="delete-button" mat-icon-button color="warn" (click)="removeUser(user.email)" matListItemIcon>
+        <button class="delete-button" mat-icon-button color="warn" (click)="removeUser(user)" [disabled]="!canBeRemoved(user)" matListItemIcon>
           <mat-icon>delete</mat-icon>
         </button>
     </div>

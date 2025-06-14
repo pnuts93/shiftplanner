@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -24,13 +24,10 @@ import {
 import TranslationEN from '../../../public/i18n/en.json';
 import TranslationDE from '../../../public/i18n/de.json';
 import { AuthService } from '../auth.service';
-import { User } from '../models';
+import { ApprovedUser, User } from '../models';
 import { environment } from '../../environments/environment';
-
-interface AllowedUser {
-  email: string;
-  isAdmin: boolean;
-}
+import { UserService } from '../user.service';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -54,15 +51,16 @@ interface AllowedUser {
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css',
 })
-export class AdminDashboardComponent implements OnInit {
-  allowedUsers: AllowedUser[] = [];
+export class AdminDashboardComponent {
+  allowedUsers$: Observable<ApprovedUser[]>;
   emailForm!: FormGroup;
   fb: FormBuilder;
   user: User | null = null;
 
   constructor(
     private translate: TranslateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.fb = inject(FormBuilder);
     this.emailForm = this.fb.group({
@@ -73,6 +71,7 @@ export class AdminDashboardComponent implements OnInit {
     this.translate.setTranslation('en', TranslationEN);
     this.translate.setTranslation('de', TranslationDE);
     this.translate.setDefaultLang(environment.defaultLocale);
+    this.allowedUsers$ = this.userService.getApprovedUsers();
     this.authService.user$.subscribe((user) => {
       if (user) {
         this.user = user;
@@ -81,39 +80,39 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.allowedUsers = [
-      { email: 'admin@example.com', isAdmin: true },
-      { email: 'user@example.com', isAdmin: false },
-    ];
-  }
-
   addUser(): void {
-    const newUser: AllowedUser = {
+    const newUser: ApprovedUser = {
       email: this.emailForm.value.email.trim(),
       isAdmin: this.emailForm.value.isAdmin,
     };
 
-    if (!this.allowedUsers.some((u) => u.email === newUser.email)) {
-      this.allowedUsers.push(newUser);
-      this.emailForm.reset({ isAdmin: false });
-      // TODO: Save to backend
-    }
+    this.userService.addApprovedUser(newUser).then(() => {
+      this.emailForm.reset();
+    });
   }
 
-  removeUser(email: string): void {
+  removeUser(deletedUser: ApprovedUser): void {
     const confirmation = confirm(
-      this.translate.instant('admin.warning', { email: email })
+      this.translate.instant('admin.warning', { email: deletedUser.email })
     );
     if (!confirmation) {
       return;
     }
-    this.allowedUsers = this.allowedUsers.filter((u) => u.email !== email);
-    // TODO: Remove from backend
+    this.userService.removeApprovedUser(deletedUser).then(() => {
+      if (this.user && this.user.email === deletedUser.email) {
+        this.authService.logout();
+      }
+    });
   }
 
-  toggleAdmin(user: AllowedUser): void {
-    // TODO: Update backend admin status
-    console.log(`${user.email} is now admin: ${user.isAdmin}`);
+  toggleAdmin(user: ApprovedUser): void {
+    this.userService.updateApprovedUser(user);
+  }
+
+  canBeRemoved(approvedUser: ApprovedUser): boolean {
+    return (
+      this.user !== null &&
+      (this.user.email === approvedUser.email || !approvedUser.isAdmin)
+    );
   }
 }

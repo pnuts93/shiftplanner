@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 
 cors();
-verify_method('GET');
+verify_method(array('GET'));
 $payload = authenticate();
 
 // Fetch data from Database
