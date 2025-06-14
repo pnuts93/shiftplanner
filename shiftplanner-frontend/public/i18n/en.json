@@ -1,0 +1,45 @@
+{
+    "user": {
+        "password": "Password",
+        "old_password": "Old Password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm Password",
+        "fname": "First name",
+        "lname": "Last name",
+        "date_employment": "Date of employment",
+        "has_specialization": "I have a specialization"
+    },
+    "title": "Shift Planner",
+    "navbar": {
+        "profile": "Profile"
+    },
+    "login": {
+        "register": "Register",
+        "error": {
+            "email_required": "Email is required",
+            "email_invalid": "Email is invalid",
+            "password_required": "Password is required"
+        }
+    },
+    "user_dashboard": {
+        "select_month": "Select month",
+        "user": "User",
+        "early": "Early",
+        "late": "Late",
+        "night": "Night",
+        "training": "Training",
+        "vacation": "Vacation",
+        "none": "- choose option -",
+        "n_experienced": "N. experienced"
+    },
+    "profile": {
+        "title": "Profile",
+        "subtitle": "Manage your profile",
+        "save": "Save"
+    },
+    "admin": {
+        "title": "Manage Users",
+        "add": "Add",
+        "warning": "Are you sure you want to remove {{email}} from the allowed users?"
+    }
+}

@@ -1,0 +1,25 @@
+mat-card > * {
+    padding: 1rem;
+}
+
+form > * {
+    margin: 0.5rem;
+}
+
+mat-card-title {
+    color: white;
+}
+
+p.user-email {
+    width: 40vw;
+    overflow: scroll;
+    color: white;
+}
+
+.user-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #ccc;
+}

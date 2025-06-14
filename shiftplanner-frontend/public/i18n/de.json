@@ -1,0 +1,45 @@
+{
+    "user": {
+        "password": "Passwort",
+        "old_password": "Altes Passwort",
+        "new_password": "Neues Passwort",
+        "confirm_password": "Passwort bestätigen",
+        "fname": "Name",
+        "lname": "Nachname",
+        "date_employment": "Datum der Anstellung",
+        "has_specialization": "Ich habe eine Fachweiterbildung"
+    },
+    "title": "Wunschdienstplaner",
+    "navbar": {
+        "profile": "Profil"
+    },
+    "login": {
+        "register": "Registrieren",
+        "error": {
+            "email_required": "Email notwendig",
+            "email_invalid": "Email ungültig",
+            "password_required": "Passwort notwendig"
+        }
+    },
+    "user_dashboard": {
+        "select_month": "Monat auswählen",
+        "user": "Benutzer",
+        "early": "Frühdienst",
+        "late": "Spätdienst",
+        "night": "Nachtdienst",
+        "training": "Forthbildung",
+        "vacation": "Urlaub",
+        "none": "- Option whählen -",
+        "n_experienced": "N. erfahrene"
+    },
+    "profile": {
+        "title": "Profil",
+        "subtitle": "Profil verwalten",
+        "save": "Speichern"
+    },
+    "admin": {
+        "title": "Benutzer verwalten",
+        "add": "Hinzufügen",
+        "warning": "Sind Sie sicher, dass Sie {{email}} von den erlaubten Benutzern entfernen möchten?"
+    }
+}

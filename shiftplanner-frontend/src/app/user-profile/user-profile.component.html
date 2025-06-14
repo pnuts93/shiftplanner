@@ -1,0 +1,114 @@
+<mat-card class="profile-card">
+  <mat-card-header>
+    <mat-card-title>{{ "profile.title" | translate }}</mat-card-title>
+    <mat-card-subtitle>{{ "profile.subtitle" | translate }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      <!-- EMAIL (read-only) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput [value]="email" disabled />
+      </mat-form-field>
+
+      <!-- FIRST NAME -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.fname" | translate }}</mat-label>
+        <input matInput formControlName="fname" />
+      </mat-form-field>
+
+      <!-- LAST NAME -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.lname" | translate }}</mat-label>
+        <input matInput formControlName="lname" />
+      </mat-form-field>
+
+      <!-- OLD PASSWORD -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.old_password" | translate }}</mat-label>
+        <input matInput formControlName="oldPassword" [type]="hidePassword[0] ? 'password' : 'text'"/>
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword[0] = !hidePassword[0]"
+            [attr.aria-label]="'Toggle password visibility'"
+            type="button"
+          >
+            <mat-icon>{{
+              hidePassword[0] ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+      </mat-form-field>
+
+      <!-- NEW PASSWORD -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.new_password" | translate }}</mat-label>
+        <input matInput formControlName="newPassword" [type]="hidePassword[1] ? 'password' : 'text'"/>
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword[1] = !hidePassword[1]"
+            [attr.aria-label]="'Toggle password visibility'"
+            type="button"
+          >
+            <mat-icon>{{
+              hidePassword[1] ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+      </mat-form-field>
+
+      <!-- CONFIRM PASSWORD -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.confirm_password" | translate }}</mat-label>
+        <input matInput formControlName="confirmPassword" [type]="hidePassword[2] ? 'password' : 'text'"/>
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword[2] = !hidePassword[2]"
+            [attr.aria-label]="'Toggle password visibility'"
+            type="button"
+          >
+            <mat-icon>{{
+              hidePassword[2] ? "visibility_off" : "visibility"
+            }}</mat-icon>
+          </button>
+      </mat-form-field>
+
+      <!-- DATE OF EMPLOYMENT -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ "user.date_employment" | translate }}</mat-label>
+        <input
+          matInput
+          type="month"
+          [matDatepicker]="picker"
+          [max]="maxDate"
+          formControlName="employmentDate"
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker touchUi></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-select
+          formControlName="locale"
+          (selectionChange)="setLocale($event.value)"
+        >
+          <mat-option
+            *ngFor="let lang of availableLanguages"
+            [value]="lang.code"
+          >
+            {{ lang.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-checkbox formControlName="hasSpecialization">{{ "user.has_specialization" | translate }}</mat-checkbox>
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="profileForm.invalid"
+      >
+        {{ "profile.save" | translate }}
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,33 @@
+<mat-toolbar>
+  <mat-toolbar-row>
+    <div class="filler"></div>
+    <a routerLink="/"><h1>{{ 'title' | translate }}</h1></a>
+    <div class="tools">
+      @if (role | async) {
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="menu"
+        aria-label="Menu button"
+      >
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="navigateTo('/profile')">
+          <mat-icon>person</mat-icon>
+          <span>{{ 'navbar.profile' | translate }}</span>
+        </button>
+        @if ((role | async) === 'admin') {
+        <button mat-menu-item (click)="navigateTo('/admin')">
+          <mat-icon>manage_accounts</mat-icon>
+          <span>Admin</span>
+        </button>
+        }
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+      }
+    </div>
+  </mat-toolbar-row>
+</mat-toolbar>

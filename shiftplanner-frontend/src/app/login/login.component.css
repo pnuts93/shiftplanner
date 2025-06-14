@@ -1,0 +1,20 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+
+mat-tab-group {
+  background-color: black;
+  border-radius: 10px;
+}
+
+form {
+  width: 300px;
+  padding: 20px;
+}
+
+mat-form-field {
+  width: 100%;
+}

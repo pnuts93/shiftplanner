@@ -1,0 +1,54 @@
+<mat-card class="admin-card">
+  <mat-card-header>
+    <mat-card-title>{{ 'admin.title' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="emailForm" (ngSubmit)="addUser()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          formControlName="email"
+          placeholder="user@example.com"
+        />
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isAdmin">Admin</mat-checkbox>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="emailForm.invalid"
+      >
+        {{ 'admin.add' | translate }}
+      </button>
+    </form>
+
+    <mat-divider class="my-3"></mat-divider>
+
+    <div *ngIf="allowedUsers.length; else noUsers">
+      <div class="user-list-item" *ngFor="let user of allowedUsers">
+        <p class="user-email" matListItemTitle>{{ user.email }}</p>
+
+        <mat-slide-toggle
+          [(ngModel)]="user.isAdmin"
+          (change)="toggleAdmin(user)"
+          class="admin-toggle"
+          ngDefaultControl
+          matListItemLine
+        >
+          Admin
+        </mat-slide-toggle>
+
+        <button class="delete-button" mat-icon-button color="warn" (click)="removeUser(user.email)" matListItemIcon>
+          <mat-icon>delete</mat-icon>
+        </button>
+    </div>
+    </div>
+
+    <ng-template #noUsers>
+      <p>No allowed users yet.</p>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
