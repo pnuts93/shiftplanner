@@ -1,8 +1,8 @@
 export interface User {
-  id: string;
+  id: number;
   fname: string;
   lname: string;
-  employmentDate: Date;
+  employmentDate: string;
   hasSpecialization: boolean;
   locale: string;
   email: string;
@@ -15,12 +15,12 @@ export interface ApprovedUser {
 }
 
 export interface ShiftOption {
-  id: string;
+  id: number;
   label: string;
 }
 
 export interface Assignment {
-  userId: string;
+  userId: number;
   date: string;
-  shiftId: string;
+  shiftId: number;
 }

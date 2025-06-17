@@ -3,3 +3,11 @@
   max-height: 80vh;
   overflow-x: scroll;
 }
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  max-height: 80vh;
+}

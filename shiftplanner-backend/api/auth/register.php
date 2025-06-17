@@ -22,7 +22,7 @@ $password = $data['password'];
 $fname = trim($data['fname']);
 $lname = trim($data['lname']);
 $employment_date = $data['employmentDate'];
-$has_specialization = $data['hasSpecialization'];
+$has_specialization = strlen($data['hasSpecialization']) === 0 ? 0 : 1;
 
 // Validate input data
 if (!is_valid_email($email) || !is_valid_password($password) || !is_allowed_length($fname, 1, 255) || !is_allowed_length($lname, 1, 255) || !is_valid_employment_date($employment_date)) {
@@ -61,7 +61,7 @@ try {
         ':fname' => $fname,
         ':lname' => $lname,
         ':employment_date' => $employment_date,
-        ':has_specialization' => string_to_bool($has_specialization),
+        ':has_specialization' => $has_specialization,
     ]);
 
     http_response_code(201);

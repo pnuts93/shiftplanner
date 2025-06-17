@@ -20,6 +20,8 @@ import TranslationEN from '../../../public/i18n/en.json';
 import TranslationDE from '../../../public/i18n/de.json';
 import { AuthService } from '../auth.service';
 import { environment } from '../../environments/environment';
+import { UserService } from '../user.service';
+import { Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -40,9 +42,10 @@ import { environment } from '../../environments/environment';
 })
 export class UserDashboardComponent implements OnInit {
   users: User[] = [];
-  user: User | null = null;
   shiftOptions: ShiftOption[] = [];
-  shiftAssignments: Record<string, Record<string, string>> = {};
+  shiftAssignments$: Observable<Record<number, Record<string, number>>> = of(
+    {}
+  );
   selectedDate = moment();
   daysInMonth: string[] = [];
   minDate: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
@@ -55,7 +58,8 @@ export class UserDashboardComponent implements OnInit {
   constructor(
     private shiftService: ShiftService,
     private translate: TranslateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.translate.addLangs(['de', 'en']);
     this.translate.setTranslation('en', TranslationEN);
@@ -63,7 +67,6 @@ export class UserDashboardComponent implements OnInit {
     this.translate.setDefaultLang(environment.defaultLocale);
     this.authService.user$.subscribe((user) => {
       if (user) {
-        this.user = user;
         this.translate.use(user.locale);
       }
     });
@@ -82,28 +85,18 @@ export class UserDashboardComponent implements OnInit {
   loadData() {
     const [year, month] = [this.selectedDate.year(), this.selectedDate.month()];
     this.daysInMonth = this.generateDaysInMonth(year, month);
-    this.shiftService.getAllUsers().subscribe((users) => (this.users = users));
-    this.shiftService
-      .getShiftOptions()
-      .subscribe((options) => (this.shiftOptions = options));
-    this.shiftService.getAssignments(year, month).subscribe((assignments) => {
-      this.shiftAssignments = assignments;
-    });
+    this.userService.getUsers().subscribe((users) => (this.users = users));
+    this.shiftOptions = this.shiftService.getShiftOptions();
+    this.shiftAssignments$ = this.shiftService.getAssignments(year, month);
   }
 
   generateDaysInMonth(year: number, month: number): string[] {
-    const days = new Date(year, month + 1, 0).getDate();
-    return Array.from(
-      { length: days },
-      (_, i) => `${year}-${month + 1}-${i + 1}`
-    );
+    month++; // Adjust month to 1-based index
+    const days = new Date(year, month, 0).getDate();
+    return Array.from({ length: days }, (_, i) => `${year}-${month}-${i + 1}`);
   }
 
   onShiftUpdate(assignment: Assignment) {
-    this.shiftService.updateAssignment(
-      assignment.userId,
-      assignment.date,
-      assignment.shiftId
-    );
+    this.shiftService.updateAssignment(assignment);
   }
 }

@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, OnInit } from '@angular/core';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { User } from './models';
 import { environment } from '../environments/environment';
 
@@ -7,8 +7,22 @@ import { environment } from '../environments/environment';
   providedIn: 'root',
 })
 export class AuthService {
-  private userSubject = new BehaviorSubject<User | null>(null);
+  private userSubject = new ReplaySubject<User | null>(1);
   user$ = this.userSubject.asObservable();
+  currentUser: User | null = null;
+
+  constructor() {
+    this.fetchUser()
+      .then((user) => {
+        this.userSubject.next(user);
+      })
+      .catch((_error) => {
+        console.warn('Error fetching user');
+      });
+    this.user$.subscribe((user) => {
+      this.currentUser = user;
+    });
+  }
 
   login(user: User) {
     this.userSubject.next(user);
@@ -19,24 +33,8 @@ export class AuthService {
     localStorage.removeItem('token');
   }
 
-  async getRole(): Promise<string | null> {
-    return this.getUser()
-      .then((value) => {
-        return value?.role ?? null;
-      })
-      .catch((_err) => {
-        return null;
-      });
-  }
-
-  async getUser(): Promise<User | null> {
-    if (!this.userSubject.getValue()) {
-      return this.fetchUser().then((user) => {
-        this.userSubject.next(user);
-        return user;
-      });
-    }
-    return this.userSubject.getValue();
+  getUser(): Observable<User | null> {
+    return this.userSubject.asObservable();
   }
 
   async fetchUser(): Promise<User | null> {
@@ -44,7 +42,7 @@ export class AuthService {
     if (!token) {
       return null;
     }
-    return fetch(environment.hostname + '/api/auth/auth.php', {
+    return fetch(`${environment.hostname}/api/auth/auth.php`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -52,6 +50,10 @@ export class AuthService {
     })
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            this.logout();
+            return null;
+          }
           throw new Error('Login failed');
         }
         return response.json();
@@ -62,7 +64,7 @@ export class AuthService {
           email: data.user.email,
           fname: data.user.fname,
           lname: data.user.lname,
-          employmentDate: new Date(data.user.employmentDate),
+          employmentDate: data.user.employmentDate,
           hasSpecialization: data.user.hasSpecialization,
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
@@ -74,12 +76,8 @@ export class AuthService {
       });
   }
 
-  isAuthenticated(): boolean {
-    return this.getRole() !== null;
-  }
-
   async executeLogin(email: string, password: string): Promise<void> {
-    return fetch(environment.hostname + '/api/auth/login.php', {
+    return fetch(`${environment.hostname}/api/auth/login.php`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -99,7 +97,7 @@ export class AuthService {
           email: data.user.email,
           fname: data.user.fname,
           lname: data.user.lname,
-          employmentDate: new Date(data.user.employmentDate),
+          employmentDate: data.user.employmentDate,
           hasSpecialization: data.user.hasSpecialization,
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
@@ -112,12 +110,9 @@ export class AuthService {
   }
 
   setUserLocale(locale: string) {
-    this.getUser().then((value) => {
-      if (!value) {
-        return;
-      }
-      value.locale = locale;
-      this.userSubject.next(value);
-    });
+    if (this.currentUser) {
+      this.currentUser.locale = locale;
+      this.userSubject.next(this.currentUser);
+    }
   }
 }

@@ -49,7 +49,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })
-export class UserProfileComponent implements OnInit {
+export class UserProfileComponent {
   fb = inject(FormBuilder);
   hidePassword: boolean[] = [true, true, true];
   profileForm: FormGroup = this.fb.group({
@@ -82,37 +82,30 @@ export class UserProfileComponent implements OnInit {
       if (user) {
         this.user = user;
         this.translate.use(user.locale);
+
+        this.email = user.email;
+
+        this.profileForm = this.fb.group(
+          {
+            fname: [user.fname, Validators.required],
+            lname: [user.lname, Validators.required],
+            oldPassword: [''],
+            newPassword: [''],
+            confirmPassword: [''],
+            employmentDate: [user.employmentDate, Validators.required],
+            hasSpecialization: [user.hasSpecialization, Validators.required],
+            locale: [user.locale, Validators.required],
+          },
+          { validators: [this.oldPasswordValidator, this.newPasswordValidator] }
+        );
       }
     });
-  }
-
-  async ngOnInit(): Promise<void> {
-    const user = await this.authService.getUser();
-    if (!user) {
-      return;
-    }
-
-    this.email = user.email;
-
-    this.profileForm = this.fb.group(
-      {
-        fname: [user.fname, Validators.required],
-        lname: [user.lname, Validators.required],
-        oldPassword: [''],
-        newPassword: [''],
-        confirmPassword: [''],
-        employmentDate: [user.employmentDate, Validators.required],
-        hasSpecialization: [user.hasSpecialization, Validators.required],
-        locale: [user.locale, Validators.required],
-      },
-      { validators: [this.oldPasswordValidator, this.newPasswordValidator] }
-    );
   }
 
   onSubmit(): void {
     if (this.profileForm.valid) {
       const updatedProfile = this.profileForm.value;
-      fetch(environment.hostname + '/api/profile/update.php', {
+      fetch(`${environment.hostname}/api/profile/update.php`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

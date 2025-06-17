@@ -88,6 +88,7 @@ export class AdminDashboardComponent {
 
     this.userService.addApprovedUser(newUser).then(() => {
       this.emailForm.reset();
+      this.emailForm.patchValue({ isAdmin: false });
     });
   }
 
