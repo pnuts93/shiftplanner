@@ -27,10 +27,11 @@
         "early": "Frühdienst",
         "late": "Spätdienst",
         "night": "Nachtdienst",
-        "training": "Forthbildung",
+        "training": "Fortbildung",
         "vacation": "Urlaub",
-        "none": "- Option whählen -",
-        "n_experienced": "N. erfahrene"
+        "none": "- Option wählen -",
+        "n_experienced": "N. erfahrene",
+        "update_failed": "Schicht-Informationen sind veraltet. Aktualisiere... 🔁"
     },
     "profile": {
         "title": "Profil",

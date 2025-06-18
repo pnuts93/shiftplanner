@@ -111,10 +111,7 @@ export class UserProfileComponent {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify({
-          ...updatedProfile,
-          employmentDate: updatedProfile.employmentDate.toISOString(),
-        }),
+        body: JSON.stringify(updatedProfile),
       })
         .then((response) => {
           if (!response.ok) {

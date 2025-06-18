@@ -23,8 +23,21 @@ switch ($method) {
 function get_shifts()
 {
     global $conn;
-    $month = isset($_GET['month']) ? intval($_GET['month']) : null;
-    $year = isset($_GET['year']) ? intval($_GET['year']) : null;
+    if (!isset($_GET['month'], $_GET['year'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid month or year']);
+        exit;
+    }
+    $month = intval($_GET['month']);
+    $year = intval($_GET['year']);
+    // Only dates from the current month to the following 12 months should be provided
+    $target_date = \DateTime::createFromFormat('Y-m-d', '' . $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT) . '-01');
+
+    if (!is_valid_date($target_date)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid month or year']);
+        exit;
+    }
     try {
         $stmt = $conn->prepare("SELECT * FROM assignments WHERE EXTRACT(MONTH FROM date) = :month AND EXTRACT(YEAR FROM date) = :year");
         $stmt->execute([':month' => $month, ':year' => $year]);
@@ -65,6 +78,13 @@ function upsert_shift()
     $date = $data['date'];
     $shiftId = intval($data['shiftId']);
 
+    $target_date = \DateTime::createFromFormat('Y-m-d', $date);
+
+    if (!is_valid_date($target_date)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid month or year']);
+        exit;
+    }
     if ($payload['role'] !== 'admin' && $payload['user_id'] !== $userId) {
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden']);
@@ -88,3 +108,9 @@ function upsert_shift()
     }
 }
 
+function is_valid_date(DateTime $target_date): bool
+{
+    $min_date = \DateTime::createFromFormat('Y-m-d', date('Y') . '-' . date('m') . '-01');
+    $max_date = \DateTime::createFromFormat('Y-m-d', intval($min_date->format('Y')) + 1 . '-' . $min_date->format('m') . '-00');
+    return $target_date >= $min_date && $target_date <= $max_date;
+}

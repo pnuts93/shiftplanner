@@ -22,7 +22,7 @@ $email = trim($payload['email']);
 $fname = trim($data['fname']);
 $lname = trim($data['lname']);
 $employment_date = $data['employmentDate'];
-$has_specialization = $data['hasSpecialization'];
+$has_specialization = strlen($data['hasSpecialization']) === 0 ? 0 : 1;
 $locale = $data['locale'];
 
 // Validate input data

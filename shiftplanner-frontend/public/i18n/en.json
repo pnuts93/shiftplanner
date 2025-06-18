@@ -30,7 +30,8 @@
         "training": "Training",
         "vacation": "Vacation",
         "none": "- choose option -",
-        "n_experienced": "N. experienced"
+        "n_experienced": "N. experienced",
+        "update_failed": "Shift information is out of date. Refreshing 🔁"
     },
     "profile": {
         "title": "Profile",

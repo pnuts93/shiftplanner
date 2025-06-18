@@ -36,9 +36,10 @@ export class ShiftService {
 
   getAssignments(
     year: number,
-    month: number
+    month: number,
+    force: boolean = false
   ): Observable<Record<number, Record<string, number>>> {
-    if (this.isTargetDate(year, month)) {
+    if (this.isTargetDate(year, month) && !force) {
       return this.assignmentRecords.asObservable();
     }
     month++; // Adjust month to 1-based index
@@ -86,7 +87,7 @@ export class ShiftService {
   }
 
   async updateAssignment(assignment: Assignment): Promise<void> {
-    fetch(`${environment.hostname}/api/shift/assignments.php`, {
+    return fetch(`${environment.hostname}/api/shift/assignments.php`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

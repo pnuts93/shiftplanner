@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Assignment, ShiftOption, User } from '../models';
 import { ShiftService } from '../shift.service';
 import {
@@ -22,6 +22,7 @@ import { AuthService } from '../auth.service';
 import { environment } from '../../environments/environment';
 import { UserService } from '../user.service';
 import { Observable, of } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -54,6 +55,7 @@ export class UserDashboardComponent implements OnInit {
     new Date().getMonth(),
     0
   );
+  private snackbar = inject(MatSnackBar);
 
   constructor(
     private shiftService: ShiftService,
@@ -82,12 +84,12 @@ export class UserDashboardComponent implements OnInit {
     this.loadData();
   }
 
-  loadData() {
+  loadData(force: boolean = false) {
     const [year, month] = [this.selectedDate.year(), this.selectedDate.month()];
     this.daysInMonth = this.generateDaysInMonth(year, month);
     this.userService.getUsers().subscribe((users) => (this.users = users));
     this.shiftOptions = this.shiftService.getShiftOptions();
-    this.shiftAssignments$ = this.shiftService.getAssignments(year, month);
+    this.shiftAssignments$ = this.shiftService.getAssignments(year, month, force);
   }
 
   generateDaysInMonth(year: number, month: number): string[] {
@@ -97,6 +99,14 @@ export class UserDashboardComponent implements OnInit {
   }
 
   onShiftUpdate(assignment: Assignment) {
-    this.shiftService.updateAssignment(assignment);
+    this.shiftService.updateAssignment(assignment)
+    .catch((_) => {
+      this.snackbar.open(
+        this.translate.instant('user_dashboard.update_failed'),
+        undefined,
+        { duration: 3000 }
+      );
+      this.loadData(true);
+    });
   }
 }

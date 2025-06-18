@@ -27,7 +27,7 @@ function get_users()
 {
     global $conn;
     try {
-        $stmt = $conn->prepare("SELECT * FROM users");
+        $stmt = $conn->prepare("SELECT * FROM users ORDER BY fname");
         $stmt->execute();
         $users = [];
         while ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
