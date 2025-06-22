@@ -1,9 +1,10 @@
 <?php
 
 // Generate JWT
-function generate_jwt($user_id, $email, $role, $expiration_time = 3600)
+function generate_jwt($user_id, $email, $role, $config)
 {
-    $secret_key = getenv('JWT_SECRET_KEY');
+    $secret_key = $config['JWT_SECRET_KEY'];
+    $expiration_time = isset($config['JWT_EXPIRATION_TIME']) ? intval($config['JWT_EXPIRATION_TIME']) : 3600;
     $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
     $payload = json_encode([
         'user_id' => $user_id,
@@ -27,20 +28,32 @@ function base64UrlEncode($text)
     );
 }
 
+function base64UrlDecode($input) {
+    $remainder = strlen($input) % 4;
+    if ($remainder) {
+        $padlen = 4 - $remainder;
+        $input .= str_repeat('=', $padlen);
+    }
+    return base64_decode(strtr($input, '-_', '+/'));
+}
+
 // Validate JWT
-function validate_jwt($jwt)
+function validate_jwt($config, $jwt)
 {
-    $secret_key = getenv('JWT_SECRET_KEY');
-    $parts = explode('.', substr($jwt, strlen("Bearer ")));
+    $secret_key = $config['JWT_SECRET_KEY'];
+    if (strpos($jwt, 'Bearer ') === 0) {
+        $jwt = substr($jwt, 7);
+    }
+    $parts = explode('.', $jwt);
     if (count($parts) !== 3) {
         return null;
     }
     list($header, $payload, $signature) = $parts;
     $expected_signature = hash_hmac('sha256', "$header.$payload", $secret_key, true);
-    if (base64UrlEncode($expected_signature) !== $signature) {
+    if (!hash_equals(base64UrlEncode($expected_signature), $signature)) {
         return null;
     }
-    $payload_data = json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', $payload))), true);
+    $payload_data = json_decode(base64UrlDecode($payload), true);
     if (isset($payload_data['exp']) && $payload_data['exp'] < time()) {
         return null;
     }
@@ -57,18 +70,25 @@ function verify_method(array $allowed_methods) {
     return $method;
 }
 
-function authenticate() {
-    $token = $_SERVER['HTTP_AUTHORIZATION'];
+function authenticate($config) {
+    $token = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
     if ($token === null) {
         http_response_code(401);
         echo json_encode(['error' => 'Unauthorized']);
         exit;
     }
-    $token_payload = validate_jwt($token);
+    $token_payload = validate_jwt($config, $token);
     if ($token_payload === null) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid token']);
         exit;
     }
     return $token_payload;
+}
+
+function create_otp($conn, $user_id, $token_type) {
+    $otp = bin2hex(random_bytes(16));
+    $stmt = $conn->prepare("INSERT INTO one_time_tokens (token, user_id, expires_at, token_type) VALUES (:otp, :user_id, NOW() + INTERVAL '30 MINUTES', :token_type)");
+    $stmt->execute([':otp' => $otp, ':user_id' => $user_id, ':token_type' => $token_type]);
+    return $otp;
 }

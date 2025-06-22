@@ -6,6 +6,7 @@ import { inject } from '@angular/core';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { map, Observable } from 'rxjs';
+import { RecoveryComponent } from './recovery/recovery.component';
 
 const roleGuard = (requiredRoles: string[]) => {
   return (): Observable<boolean> => {
@@ -25,6 +26,7 @@ const roleGuard = (requiredRoles: string[]) => {
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'recovery', component: RecoveryComponent },
   {
     path: '',
     component: UserDashboardComponent,

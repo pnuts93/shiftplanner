@@ -80,8 +80,8 @@ export class ShiftService {
         }
         this.assignmentRecords.next(assignments);
       })
-      .catch((error) => {
-        console.error('Error fetching assignments:', error);
+      .catch((_) => {
+        console.error('Error fetching assignments');
       });
     return this.assignmentRecords.asObservable();
   }

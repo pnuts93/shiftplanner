@@ -1,0 +1,41 @@
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>{{
+        `recovery.${type}.title` | translate
+      }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (resetRequestState === "idle") {
+      <form [formGroup]="passwordForgotForm" (ngSubmit)="onForgotPassword()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" />
+          <mat-error
+            *ngIf="passwordForgotForm.get('email')?.hasError('required')"
+          >
+            {{ "recovery.error.email_required" | translate }}
+          </mat-error>
+          <mat-error *ngIf="passwordForgotForm.get('email')?.hasError('email')">
+            {{ "recovery.error.email_invalid" | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit">
+          {{ `recovery.${type}.send_button` | translate }}
+        </button>
+      </form>
+      } @else if (resetRequestState === "success") {
+      <div class="email-confirmation-dialog">
+        <p>{{ `recovery.${type}.success` | translate }}</p>
+      </div>
+      } @else if (resetRequestState === "error") {
+      <div class="email-confirmation-dialog">
+        <p>{{ `recovery.${type}.error` | translate }}</p>
+      </div>
+      } @else {
+      <mat-spinner class="loading-spinner"></mat-spinner>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

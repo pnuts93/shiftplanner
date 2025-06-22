@@ -1,12 +1,21 @@
 <div class="login-container">
   <mat-tab-group>
     <mat-tab label="Login">
+      @if (loginRequestState === "error") {
+      <div class="confirmation-dialog">
+        <p>{{ "login.error.confirmation_failed" | translate }}</p>
+      </div>
+      } @else if (loginRequestState === "loading") {
+      <div class="confirmation-dialog">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
       <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
           <input matInput formControlName="email" type="email" />
           <mat-error *ngIf="loginForm.get('email')?.hasError('required')">
-            {{ "login.error.email_required" | translate }}
+            {{ "login.confirmation_needed" | translate }}
           </mat-error>
           <mat-error *ngIf="loginForm.get('email')?.hasError('email')">
             {{ "login.error.email_invalid" | translate }}
@@ -41,14 +50,34 @@
           color="primary"
           class="full-width"
           type="submit"
-          [disabled]="loading"
         >
-          {{ loading ? "Logging in..." : "Login" }}
+          Login
         </button>
+
+        <a
+          class="password-forgot"
+          routerLink="/recovery"
+          [queryParams]="{ type: 'password_reset' }"
+          >{{ "login.password_forgot" | translate }}</a
+        >
       </form>
+      }
     </mat-tab>
 
     <mat-tab label="Register">
+      @if (registrationRequestState === "success") {
+      <div class="confirmation-dialog">
+        <p>{{ "login.confirmation_sent" | translate }}</p>
+      </div>
+      } @else if (registrationRequestState === "error") {
+      <div class="confirmation-dialog">
+        <p>{{ "login.error.registration_failed" | translate }}</p>
+      </div>
+      } @else if (registrationRequestState === "loading") {
+      <div class="confirmation-dialog">
+        <mat-spinner></mat-spinner>
+      </div>
+      } @else {
       <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="form">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Email</mat-label>
@@ -101,11 +130,15 @@
           ></mat-datepicker-toggle>
           <mat-datepicker #picker touchUi></mat-datepicker>
         </mat-form-field>
-        <mat-checkbox formControlName="hasSpecialization">{{ "user.has_specialization" | translate }}</mat-checkbox><br>
+        <mat-checkbox formControlName="hasSpecialization">{{
+          "user.has_specialization" | translate
+        }}</mat-checkbox
+        ><br />
         <button mat-raised-button color="primary" type="submit">
           Register
         </button>
       </form>
+      }
     </mat-tab>
   </mat-tab-group>
 </div>

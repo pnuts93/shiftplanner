@@ -15,10 +15,34 @@
     },
     "login": {
         "register": "Registrieren",
+        "confirmation_needed": "Deine Email muss bestätigt werden",
+        "confirmation_sent": "Bestätigungslink wurde an deine Email gesendet",
+        "resend_confirmation": "Bestätigungs-Email erneut senden",
+        "password_forgot": "Passwort vergessen?",
         "error": {
             "email_required": "Email notwendig",
             "email_invalid": "Email ungültig",
-            "password_required": "Passwort notwendig"
+            "password_required": "Passwort notwendig",
+            "confirmation_failed": "Bestätigung fehlgeschlagen. Bitte versuche es später erneut",
+            "registration_failed": "Registrierung fehlgeschlagen. Bitte überprüfe, ob du ein autorisierter Benutzer bist"
+        }
+    },
+    "recovery": {
+        "password_reset": {
+            "title": "Paswswort zurücksetzen",
+            "send_button": "Reset-Link senden",
+            "success": "Reset-Link wurde an deine Email gesendet",
+            "error": "Fehler beim Senden des Reset-Links. Bitte versuche es später erneut"
+        },
+        "email_confirmation": {
+            "title": "Email Bestätigung",
+            "send_button": "Bestätigungs-Email senden",
+            "success": "Bestätigungslink wurde an deine Email gesendet",
+            "error": "Fehler beim Senden des Email-Bestätigungslinks. Bitte versuche es später erneut"
+        },
+        "error": {
+            "email_required": "Email is required",
+            "email_invalid": "Email is invalid"
         }
     },
     "user_dashboard": {

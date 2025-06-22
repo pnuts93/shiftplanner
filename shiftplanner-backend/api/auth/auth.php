@@ -3,9 +3,11 @@ require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 
-cors();
+$config = parse_ini_file('../../private/app.ini');
+$conn = db($config);
+cors($config);
 verify_method(array('GET'));
-$payload = authenticate();
+$payload = authenticate($config);
 
 // Fetch data from Database
 try {

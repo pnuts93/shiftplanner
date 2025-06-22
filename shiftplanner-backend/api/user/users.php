@@ -2,10 +2,12 @@
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../email/send-email.php';
 
-cors();
+$config = parse_ini_file('../../private/app.ini');
+$conn = db($config);
+cors($config);
 $method = verify_method(array('GET', 'POST', 'PUT'));
-$payload = authenticate();
 
 switch ($method) {
     case 'GET':
@@ -25,7 +27,10 @@ switch ($method) {
 
 function get_users()
 {
+
     global $conn;
+    global $config;
+    authenticate($config);
     try {
         $stmt = $conn->prepare("SELECT * FROM users ORDER BY fname");
         $stmt->execute();
@@ -54,82 +59,163 @@ function get_users()
 function add_user()
 {
     global $conn;
+    global $config;
     header('Content-Type: application/json');
 
     // Read and decode JSON body
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($data['email'], $data['isAdmin'])) {
+    if (!$data || !isset($data['email'], $data['password'], $data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit;
     }
 
+    // Sanitize and extract input
     $email = trim($data['email']);
+    $password = $data['password'];
+    $fname = trim($data['fname']);
+    $lname = trim($data['lname']);
+    $employment_date = $data['employmentDate'];
+    $has_specialization = strlen($data['hasSpecialization']) === 0 ? 0 : 1;
+    $locale = $config['DEFAULT_LOCALE'] ?? 'en';
 
-    if (!is_valid_email($email)) {
+    // Validate input data
+    if (!is_valid_email($email) || !is_valid_password($password) || !is_allowed_length($fname, 1, 255) || !is_allowed_length($lname, 1, 255) || !is_valid_employment_date($employment_date)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid email format']);
+        echo json_encode(['error' => 'Invalid input data']);
         exit;
     }
 
+    // Hash password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
     try {
-        $stmt = $conn->prepare("INSERT INTO users (email, is_admin) VALUES (:email, :is_admin)");
-        $stmt->execute([':email' => $email, ':is_admin' => strlen($data['isAdmin']) === 0 ? 0 : 1]);
+        // Check for allowed user emails
+        $stmt = $conn->prepare("SELECT COUNT(*) FROM approved_users WHERE email = :email");
+        $stmt->execute([':email' => $email]);
+        if ($stmt->fetchColumn() == 0) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Email not allowed']);
+            exit;
+        }
+        // Insert user
+        $stmt = $conn->prepare("
+        INSERT INTO users (email, password, fname, lname, employment_date, has_specialization, locale)
+        VALUES (:email, :password, :fname, :lname, :employment_date, :has_specialization, :locale)
+        RETURNING *
+    ");
+        $stmt->execute([
+            ':email' => $email,
+            ':password' => $hashedPassword,
+            ':fname' => $fname,
+            ':lname' => $lname,
+            ':employment_date' => $employment_date,
+            ':has_specialization' => $has_specialization,
+            ':locale' => $locale
+        ]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $otp = create_otp($conn, $user['id'], 'email_confirmation');
+        prepare_email_confirmation($otp, $email, $fname, $config);
         http_response_code(201);
-        echo json_encode(['message' => 'User added successfully']);
+        echo json_encode(['message' => 'User registered successfully']);
     } catch (PDOException $e) {
-        http_response_code(500);
-        error_log($e->getMessage());
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        if ($e->getCode() === '23505') { // Unique violation
+            http_response_code(409);
+            echo json_encode(['error' => 'Email already registered']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        }
     }
 }
 
 function update_user()
 {
     global $conn;
-    global $payload;
+    global $config;
+    $payload = authenticate($config);
     header('Content-Type: application/json');
 
     // Read and decode JSON body
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($data['email'], $data['isAdmin'])) {
+    if (!$data || !isset($data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'], $data['locale'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit;
     }
 
-    $email = trim($data['email']);
-    $is_admin = boolval($data['isAdmin']);
+    // Sanitize and extract input
+    $email = trim($payload['email']);
+    $fname = trim($data['fname']);
+    $lname = trim($data['lname']);
+    $employment_date = $data['employmentDate'];
+    $has_specialization = strlen($data['hasSpecialization']) === 0 ? 0 : 1;
+    $locale = $data['locale'];
 
-    if (!is_valid_email($email)) {
+    // Validate input data
+    if (!is_valid_email($email) || !is_allowed_length($fname, 1, 255) || !is_allowed_length($lname, 1, 255) || !is_valid_employment_date($employment_date)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Invalid email format']);
-        exit;
-    } else if (!$is_admin && $payload['email'] !== $email) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Cannot remove admin privileges from other users']);
+        echo json_encode(['error' => 'Invalid input data']);
         exit;
     }
 
-    try {
-        // Check if user is only admin and tries to remove own admin privileges
-        if ($payload['email'] === $email && !$is_admin) {
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE is_admin = TRUE");
-            $stmt->execute();
-            if ($stmt->fetchColumn() === 1) {
-                http_response_code(400);
-                echo json_encode(['error' => 'Cannot remove own admin privileges, at least one admin is required']);
+    if (isset($data['oldPassword']) && $data['oldPassword'] !== '' && $data['newPassword'] !== '' && $data['confirmPassword'] !== '') {
+        if (!isset($data['newPassword'], $data['confirmPassword']) || !is_valid_password($data['newPassword']) || !is_valid_password($data['confirmPassword']) || $data['newPassword'] !== $data['confirmPassword']) {
+            http_response_code(400);
+            echo json_encode(['error' => 'New password is not valid']);
+            exit;
+        }
+        $oldPassword = $data['oldPassword'];
+        $newPassword = $data['newPassword'];
+        // Hash the password
+        $hashedNewPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+        // Validate old password
+        try {
+            $stmt = $conn->prepare("SELECT password FROM users WHERE email = :email");
+            $stmt->execute([':email' => $email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$user || !password_verify($oldPassword, $user['password'])) {
+                http_response_code(401);
+                echo json_encode(['error' => 'Invalid old password']);
                 exit;
             }
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+            exit;
         }
-        $stmt = $conn->prepare("UPDATE users SET is_admin = :is_admin WHERE email = :email");
-        $stmt->execute([':email' => $email, ':is_admin' => $is_admin]);
+    }
+
+    try {
+        if (isset($hashedNewPassword)) {
+            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, password = :password, locale = :locale WHERE email = :email");
+            $stmt->execute([
+                ':email' => $email,
+                ':fname' => $fname,
+                ':lname' => $lname,
+                ':employment_date' => $employment_date,
+                ':has_specialization' => $has_specialization,
+                ':password' => $hashedNewPassword,
+                ':locale' => $locale
+            ]);
+        } else {
+            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, locale = :locale WHERE email = :email");
+            $stmt->execute([
+                ':email' => $email,
+                ':fname' => $fname,
+                ':lname' => $lname,
+                ':employment_date' => $employment_date,
+                ':has_specialization' => $has_specialization,
+                ':locale' => $locale
+            ]);
+        }
         http_response_code(200);
-        echo json_encode(['message' => 'User updated successfully']);
+        echo json_encode(['message' => 'Profile updated successfully']);
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        exit;
     }
 }

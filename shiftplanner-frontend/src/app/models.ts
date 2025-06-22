@@ -24,3 +24,5 @@ export interface Assignment {
   date: string;
   shiftId: number;
 }
+
+export type RequestState = 'idle' | 'loading' | 'success' | 'error';

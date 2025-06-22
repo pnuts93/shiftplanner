@@ -105,7 +105,7 @@ export class UserProfileComponent {
   onSubmit(): void {
     if (this.profileForm.valid) {
       const updatedProfile = this.profileForm.value;
-      fetch(`${environment.hostname}/api/profile/update.php`, {
+      fetch(`${environment.hostname}/api/user/users.php`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -119,12 +119,19 @@ export class UserProfileComponent {
           }
           return response.json();
         })
-        .then((data) => {
-          this.authService.login(data.user);
+        .then(() => {
+          const updatedUser: User = {
+            ...this.user!,
+            fname: updatedProfile.fname,
+            lname: updatedProfile.lname,
+            employmentDate: updatedProfile.employmentDate,
+            hasSpecialization: updatedProfile.hasSpecialization,
+            locale: updatedProfile.locale,
+          }
           this.profileForm.markAsPristine();
         })
-        .catch((error) => {
-          console.error('Error updating profile:', error);
+        .catch((_) => {
+          console.error('Error updating profile');
         });
     }
   }

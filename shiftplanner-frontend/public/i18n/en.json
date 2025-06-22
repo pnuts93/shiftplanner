@@ -15,10 +15,34 @@
     },
     "login": {
         "register": "Register",
+        "confirmation_needed": "Your email needs to be confirmed",
+        "confirmation_sent": "Check your email for the confirmation link",
+        "resend_confirmation": "Resend confirmation email",
+        "password_forgot": "Forgot password?",
         "error": {
             "email_required": "Email is required",
             "email_invalid": "Email is invalid",
-            "password_required": "Password is required"
+            "password_required": "Password is required",
+            "confirmation_failed": "Confirmation failed. Please try again later",
+            "registration_failed": "Registration failed. Verify that you are an authorized user"
+        }
+    },
+    "recovery": {
+        "password_reset": {
+            "title": "Reset Password",
+            "send_button": "Send Reset Link",
+            "success": "Reset link sent to your email",
+            "error": "Error sending reset link. Please try again later"
+        },
+        "email_confirmation": {
+            "title": "Confirm Email",
+            "send_button": "Send confirmation Email",
+            "success": "Confirmation link sent to your email",
+            "error": "Error sending email confirmation link. Please try again later"
+        },
+        "error": {
+            "email_required": "Email is required",
+            "email_invalid": "Email is invalid"
         }
     },
     "user_dashboard": {

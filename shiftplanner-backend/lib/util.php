@@ -45,12 +45,14 @@ function string_to_bool($string)
     return false;
 }
 
-function cors()
+function cors($config)
 {
-    // Allow from any origin
-    if (isset($_SERVER['HTTP_ORIGIN'])) {
-        // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-        // you want to allow, and if so:
+    $allowed_origins = [
+        'http://localhost:4200', // Local development
+        'http://127.0.0.1:4200', // Local development
+        "https://{$config['DOMAIN']}"
+    ];
+    if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins, true)) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Max-Age: 86400');

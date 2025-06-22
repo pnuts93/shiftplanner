@@ -10,11 +10,27 @@ mat-tab-group {
   border-radius: 10px;
 }
 
-form {
+form,
+.confirmation-dialog {
   width: 300px;
   padding: 20px;
 }
 
+.confirmation-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 mat-form-field {
   width: 100%;
+}
+
+p {
+  color: white;
+}
+
+a.password-forgot {
+  padding-left: 10px;
+  color: #ffabf3;
 }

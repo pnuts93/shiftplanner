@@ -19,6 +19,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { environment } from '../../environments/environment';
+import { EmailNotConfirmedError } from '../errors';
+import { RequestState } from '../models';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-login',
@@ -31,6 +34,7 @@ import { environment } from '../../environments/environment';
     MatIconModule,
     MatInputModule,
     MatButtonModule,
+    MatProgressSpinnerModule,
     MatTabsModule,
     ReactiveFormsModule,
     RouterModule,
@@ -41,7 +45,8 @@ import { environment } from '../../environments/environment';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  loading = false;
+  loginRequestState: RequestState = 'idle';
+  registrationRequestState: RequestState = 'idle';
   hidePassword = true;
   private formBuilder = inject(FormBuilder);
   loginForm = this.formBuilder.group({
@@ -71,28 +76,32 @@ export class LoginComponent {
 
   onLogin() {
     if (this.loginForm.invalid) return;
-    this.loading = true;
 
     const { email, password } = this.loginForm.value;
     if (!email || !password) {
-      this.loading = false;
       return;
     }
+    this.loginRequestState = 'loading';
     this.authService
       .executeLogin(email, password)
       .then(() => {
-        this.loading = false;
         this.router.navigate(['']);
       })
-      .catch((_err) => {
-        this.loading = false;
+      .catch((error) => {
+        if (error instanceof EmailNotConfirmedError) {
+          this.router.navigate(['/recovery'], {
+            queryParams: { type: 'email_confirmation' },
+          });
+        }
+        this.loginRequestState = "error";
       });
   }
 
   onRegister(): void {
     if (this.registerForm.valid) {
       const registerData = this.registerForm.value;
-      fetch('http://localhost:8000/api/auth/register.php', {
+      this.registrationRequestState = 'loading';
+      fetch('http://localhost:8000/api/user/users.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,10 +119,10 @@ export class LoginComponent {
           if (!response.ok) {
             throw new Error('Registration failed: ' + response.statusText);
           }
-          this.router.navigate(['/login']);
+          this.registrationRequestState = 'success';
         })
-        .catch((error) => {
-          console.error('Registration failed:', error);
+        .catch((_) => {
+          this.registrationRequestState = 'error';
         });
     }
   }

@@ -1,0 +1,19 @@
+# Make sure to protect this directory from access via webserver
+DOMAIN=
+
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USER=
+DB_PASS=
+
+SMTP_HOST=
+SMTP_PORT=
+SMTP_EMAIL=
+SMTP_PASSWORD=
+NO_REPLY_EMAIL=
+
+JWT_SECRET_KEY=
+JWT_EXPIRATION_TIME=
+
+DEFAULT_LOCALE=

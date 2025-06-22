@@ -2,6 +2,7 @@ import { Injectable, OnInit } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { User } from './models';
 import { environment } from '../environments/environment';
+import { EmailNotConfirmedError } from './errors';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class AuthService {
       .then((user) => {
         this.userSubject.next(user);
       })
-      .catch((_error) => {
+      .catch((_) => {
         console.warn('Error fetching user');
       });
     this.user$.subscribe((user) => {
@@ -86,6 +87,9 @@ export class AuthService {
     })
       .then((response) => {
         if (!response.ok) {
+          if (response.status === 403) {
+            throw new EmailNotConfirmedError();
+          }
           throw new Error('Login failed');
         }
         return response.json();
@@ -103,9 +107,6 @@ export class AuthService {
           role: data.user.role,
         };
         this.login(user);
-      })
-      .catch((error) => {
-        throw error;
       });
   }
 

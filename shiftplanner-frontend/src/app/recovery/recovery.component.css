@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+
+mat-card-title {
+  color: white;
+}
+
+form {
+  width: 300px;
+  padding: 20px;
+}
+
+p {
+  color: white;
+}
