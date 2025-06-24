@@ -1,5 +1,6 @@
 mat-toolbar {
-  height: 5vh;
+  height: 5%;
+  overflow: hidden;
 }
 
 mat-toolbar-row {

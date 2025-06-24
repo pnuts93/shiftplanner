@@ -37,8 +37,9 @@ function prepare_forgot_password($otp, $email, $config)
 
 function send_email($to, $subject, $message, $config)
 {
-    error_log("Sending email to: $to\nSubject: $subject\nMessage: $message");
-    /*
+    // Uncomment when using locally
+    //error_log("Sending email to: $to\nSubject: $subject\nMessage: $message");
+
     $mail = new PHPMailer(true);
 
     try {
@@ -61,9 +62,8 @@ function send_email($to, $subject, $message, $config)
         $mail->Body = $message;
 
         $mail->send();
-        echo 'Message has been sent';
+        error_log("Email sent successfully");
     } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+        error_log("Email could not be sent: {$mail->ErrorInfo}");
     }
-        */
 }

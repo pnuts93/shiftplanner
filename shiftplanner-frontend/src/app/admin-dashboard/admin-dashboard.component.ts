@@ -21,13 +21,10 @@ import {
   TranslatePipe,
   TranslateService,
 } from '@ngx-translate/core';
-import TranslationEN from '../../../public/i18n/en.json';
-import TranslationDE from '../../../public/i18n/de.json';
 import { AuthService } from '../auth.service';
 import { ApprovedUser, User } from '../models';
-import { environment } from '../../environments/environment';
 import { UserService } from '../user.service';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -67,15 +64,10 @@ export class AdminDashboardComponent {
       email: ['', [Validators.required, Validators.email]],
       isAdmin: false,
     });
-    this.translate.addLangs(['de', 'en']);
-    this.translate.setTranslation('en', TranslationEN);
-    this.translate.setTranslation('de', TranslationDE);
-    this.translate.setDefaultLang(environment.defaultLocale);
     this.allowedUsers$ = this.userService.getApprovedUsers();
     this.authService.user$.subscribe((user) => {
       if (user) {
         this.user = user;
-        this.translate.use(user.locale);
       }
     });
   }

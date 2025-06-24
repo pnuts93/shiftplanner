@@ -74,10 +74,6 @@ export class UserProfileComponent {
     private translate: TranslateService,
     private authService: AuthService
   ) {
-    this.translate.addLangs(['de', 'en']);
-    this.translate.setTranslation('en', TranslationEN);
-    this.translate.setTranslation('de', TranslationDE);
-    this.translate.setDefaultLang(environment.defaultLocale);
     this.authService.user$.subscribe((user) => {
       if (user) {
         this.user = user;
@@ -128,6 +124,7 @@ export class UserProfileComponent {
             hasSpecialization: updatedProfile.hasSpecialization,
             locale: updatedProfile.locale,
           }
+          this.authService.login(updatedUser);
           this.profileForm.markAsPristine();
         })
         .catch((_) => {
@@ -137,7 +134,7 @@ export class UserProfileComponent {
   }
 
   setLocale(locale: string): void {
-    this.authService.setUserLocale(locale);
+    this.translate.use(locale);
   }
 
   oldPasswordValidator(control: AbstractControl): ValidationErrors {

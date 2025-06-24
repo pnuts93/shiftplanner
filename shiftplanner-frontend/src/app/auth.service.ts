@@ -109,11 +109,4 @@ export class AuthService {
         this.login(user);
       });
   }
-
-  setUserLocale(locale: string) {
-    if (this.currentUser) {
-      this.currentUser.locale = locale;
-      this.userSubject.next(this.currentUser);
-    }
-  }
 }

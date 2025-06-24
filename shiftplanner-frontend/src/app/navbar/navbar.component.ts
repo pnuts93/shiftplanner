@@ -42,6 +42,11 @@ export class NavbarComponent {
     this.translate.setTranslation('en', TranslationEN);
     this.translate.setTranslation('de', TranslationDE);
     this.translate.setDefaultLang(environment.defaultLocale);
+    this.authService.getUser().subscribe((user) => {
+      if (user) {
+        this.translate.use(user.locale);
+      }
+    });
     this.role = this.authService.getUser().pipe(
       map((user) => user?.role ?? null)
     );

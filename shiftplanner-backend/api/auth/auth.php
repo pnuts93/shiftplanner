@@ -36,6 +36,6 @@ try {
 } catch (PDOException $e) {
     http_response_code(500);
     error_log('Database error: ' . $e->getMessage());
-    echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+    echo json_encode(['error' => 'Database error']);
     exit;
 }

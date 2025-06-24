@@ -11,15 +11,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule } from '@angular/material/table';
 import { Assignment, ShiftOption, User } from '../models';
 import { MatSelectModule } from '@angular/material/select';
-import TranslationEN from '../../../public/i18n/en.json';
-import TranslationDE from '../../../public/i18n/de.json';
 import {
   TranslateModule,
   TranslatePipe,
-  TranslateService,
 } from '@ngx-translate/core';
 import { AuthService } from '../auth.service';
-import { environment } from '../../environments/environment';
 import { Observable, of } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
@@ -58,19 +54,11 @@ export class UserShiftTableComponent implements OnChanges {
 
   headers: string[] = [];
 
-  constructor(
-    private translate: TranslateService,
-    private authService: AuthService
-  ) {
-    this.translate.addLangs(['de', 'en']);
-    this.translate.setTranslation('en', TranslationEN);
-    this.translate.setTranslation('de', TranslationDE);
-    this.translate.setDefaultLang(environment.defaultLocale);
+  constructor(private authService: AuthService) {
     this.authService.user$.subscribe((user) => {
       if (user) {
         this.currentUser = user;
         this.userRole = user.role ?? null;
-        this.translate.use(user.locale);
       }
     });
   }

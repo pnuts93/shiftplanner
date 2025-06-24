@@ -1,5 +1,5 @@
 <div class="dashboard-container">
-  <mat-form-field appearance="fill">
+  <mat-form-field class="current-month" appearance="fill">
     <mat-label>{{'user_dashboard.select_month' | translate}}</mat-label>
     <input
       matInput
@@ -12,9 +12,7 @@
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker
       #picker
-      startView="multi-year"
       (monthSelected)="onMonthSelected($event, picker)"
-      panelClass="month-picker"
       touchUi
     ></mat-datepicker>
   </mat-form-field>

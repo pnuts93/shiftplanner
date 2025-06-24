@@ -1,6 +1,6 @@
 .table-container {
   width: 100vw;
-  max-height: 80vh;
+  max-height: 83vh;
   overflow-x: scroll;
 }
 
@@ -9,5 +9,5 @@
   justify-content: center;
   align-items: center;
   width: 100vw;
-  max-height: 80vh;
+  max-height: 85vh;
 }

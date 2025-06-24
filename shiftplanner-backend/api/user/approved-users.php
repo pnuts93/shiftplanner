@@ -60,6 +60,7 @@ function get_approved_users()
 function add_approved_user()
 {
     global $conn;
+    global $payload;
     header('Content-Type: application/json');
 
     // Read and decode JSON body
@@ -82,12 +83,13 @@ function add_approved_user()
     try {
         $stmt = $conn->prepare("INSERT INTO approved_users (email, is_admin) VALUES (:email, :is_admin)");
         $stmt->execute([':email' => $email, ':is_admin' => strlen($data['isAdmin']) === 0 ? 0 : 1]);
+        error_log("User {$payload['user_id']} added approved user: $email");
         http_response_code(201);
         echo json_encode(['message' => 'User added successfully']);
     } catch (PDOException $e) {
         http_response_code(500);
         error_log($e->getMessage());
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        echo json_encode(['error' => 'Database error']);
     }
 }
 
@@ -107,7 +109,7 @@ function update_approved_user()
     }
 
     $email = trim($data['email']);
-    $is_admin = boolval($data['isAdmin']);
+    $is_admin = strlen($data['isAdmin']) === 0 ? 0 : 1;
 
     if (!is_valid_email($email)) {
         http_response_code(400);
@@ -176,10 +178,12 @@ function delete_approved_user()
         }
         $stmt = $conn->prepare("DELETE FROM approved_users WHERE email = :email AND (is_admin = FALSE OR email = :current_email)");
         $stmt->execute([':email' => $email, ':current_email' => $payload['email']]);
+        error_log("User {$payload['user_id']} removed approved user: $email");
         http_response_code(200);
         echo json_encode(['message' => 'User deleted successfully']);
     } catch (PDOException $e) {
         http_response_code(500);
+        error_log($e->getMessage());
         echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
     }
 }

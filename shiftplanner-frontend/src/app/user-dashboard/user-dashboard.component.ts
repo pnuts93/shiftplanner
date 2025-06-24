@@ -16,10 +16,6 @@ import {
   TranslatePipe,
   TranslateService,
 } from '@ngx-translate/core';
-import TranslationEN from '../../../public/i18n/en.json';
-import TranslationDE from '../../../public/i18n/de.json';
-import { AuthService } from '../auth.service';
-import { environment } from '../../environments/environment';
 import { UserService } from '../user.service';
 import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -60,18 +56,8 @@ export class UserDashboardComponent implements OnInit {
   constructor(
     private shiftService: ShiftService,
     private translate: TranslateService,
-    private authService: AuthService,
     private userService: UserService
   ) {
-    this.translate.addLangs(['de', 'en']);
-    this.translate.setTranslation('en', TranslationEN);
-    this.translate.setTranslation('de', TranslationDE);
-    this.translate.setDefaultLang(environment.defaultLocale);
-    this.authService.user$.subscribe((user) => {
-      if (user) {
-        this.translate.use(user.locale);
-      }
-    });
   }
 
   ngOnInit() {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, NgZone } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,17 +8,13 @@ import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../auth.service';
 import { CommonModule } from '@angular/common';
-import TranslationEN from '../../../public/i18n/en.json';
-import TranslationDE from '../../../public/i18n/de.json';
 import {
   TranslateModule,
   TranslatePipe,
-  TranslateService,
 } from '@ngx-translate/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { environment } from '../../environments/environment';
 import { EmailNotConfirmedError } from '../errors';
 import { RequestState } from '../models';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -63,16 +59,7 @@ export class LoginComponent {
   });
   maxDate = new Date();
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private translate: TranslateService
-  ) {
-    this.translate.addLangs(['de', 'en']);
-    this.translate.setTranslation('en', TranslationEN);
-    this.translate.setTranslation('de', TranslationDE);
-    this.translate.setDefaultLang(environment.defaultLocale);
-  }
+  constructor(private authService: AuthService, private router: Router) {}
 
   onLogin() {
     if (this.loginForm.invalid) return;
@@ -93,7 +80,7 @@ export class LoginComponent {
             queryParams: { type: 'email_confirmation' },
           });
         }
-        this.loginRequestState = "error";
+        this.loginRequestState = 'error';
       });
   }
 
