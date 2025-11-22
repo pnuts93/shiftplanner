@@ -93,6 +93,7 @@ function upsert_shift()
         exit;
     }
     try {
+        error_log("User {$payload['user_id']} is upserting assignment for user $userId on date $date with shift $shiftId");
         $upsert_file = fopen("upsert_assignment.sql", "r");
         $stmt = $conn->prepare(stream_get_contents($upsert_file));
         fclose($upsert_file);

@@ -81,6 +81,7 @@ function add_approved_user()
     }
 
     try {
+        error_log("User {$payload['user_id']} is adding approved user");
         $stmt = $conn->prepare("INSERT INTO approved_users (email, is_admin) VALUES (:email, :is_admin)");
         $stmt->execute([':email' => $email, ':is_admin' => strlen($data['isAdmin']) === 0 ? 0 : 1]);
         error_log("User {$payload['user_id']} added approved user: $email");
@@ -132,6 +133,7 @@ function update_approved_user()
                 exit;
             }
         }
+        error_log("User {$payload['user_id']} is modifying admin status for approved user to {!$is_admin}");
         $stmt = $conn->prepare("UPDATE approved_users SET is_admin = :is_admin WHERE email = :email");
         $stmt->execute([':email' => $email, ':is_admin' => $is_admin]);
         http_response_code(200);

@@ -19,6 +19,7 @@
         "confirmation_sent": "Check your email for the confirmation link",
         "resend_confirmation": "Resend confirmation email",
         "password_forgot": "Forgot password?",
+        "policy_accept": "By clicking here, I accept the ",
         "error": {
             "email_required": "Email is required",
             "email_invalid": "Email is invalid",

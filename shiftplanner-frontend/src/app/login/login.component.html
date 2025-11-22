@@ -132,10 +132,14 @@
         </mat-form-field>
         <mat-checkbox formControlName="hasSpecialization">{{
           "user.has_specialization" | translate
-        }}</mat-checkbox
-        ><br />
+        }}</mat-checkbox>
+        <br />
+        <p>
+          *{{ "login.policy_accept" | translate }}
+          <a target="_blank" [href]="policyUrl">policy</a>
+        </p>
         <button mat-raised-button color="primary" type="submit">
-          Register
+          *Register
         </button>
       </form>
       }

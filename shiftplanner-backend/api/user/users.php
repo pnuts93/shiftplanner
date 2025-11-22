@@ -92,6 +92,7 @@ function add_user()
 
     try {
         // Check for allowed user emails
+        error_log("Attempting registration of new user");
         $stmt = $conn->prepare("SELECT COUNT(*) FROM approved_users WHERE email = :email");
         $stmt->execute([':email' => $email]);
         if ($stmt->fetchColumn() == 0) {
@@ -115,6 +116,7 @@ function add_user()
             ':locale' => $locale
         ]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        error_log("User {$user['id']} registered successfully");
         $otp = create_otp($conn, $user['id'], 'email_confirmation');
         prepare_email_confirmation($otp, $email, $fname, $config);
         http_response_code(201);

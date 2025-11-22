@@ -12,7 +12,7 @@ CREATE TABLE users (
     lname TEXT NOT NULL,
     employment_date DATE NOT NULL,
     has_specialization BOOLEAN DEFAULT FALSE NOT NULL,
-    locale TEXT NOT NULL DEFAULT 'en',
+    locale TEXT NOT NULL DEFAULT 'en'
 );
 
 CREATE TABLE assignments (

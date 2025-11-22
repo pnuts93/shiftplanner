@@ -8,16 +8,14 @@ import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../auth.service';
 import { CommonModule } from '@angular/common';
-import {
-  TranslateModule,
-  TranslatePipe,
-} from '@ngx-translate/core';
+import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { EmailNotConfirmedError } from '../errors';
 import { RequestState } from '../models';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -58,6 +56,7 @@ export class LoginComponent {
     hasSpecialization: false,
   });
   maxDate = new Date();
+  policyUrl = `${environment.hostname}/app/policy.php`;
 
   constructor(private authService: AuthService, private router: Router) {}
 
@@ -88,7 +87,7 @@ export class LoginComponent {
     if (this.registerForm.valid) {
       const registerData = this.registerForm.value;
       this.registrationRequestState = 'loading';
-      fetch('http://localhost:8000/api/user/users.php', {
+      fetch(`${environment.hostname}/api/user/users.php`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

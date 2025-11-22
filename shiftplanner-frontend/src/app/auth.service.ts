@@ -1,5 +1,5 @@
-import { Injectable, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Observable, ReplaySubject } from 'rxjs';
 import { User } from './models';
 import { environment } from '../environments/environment';
 import { EmailNotConfirmedError } from './errors';

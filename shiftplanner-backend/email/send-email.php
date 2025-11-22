@@ -53,7 +53,7 @@ function send_email($to, $subject, $message, $config)
         $mail->Port =  $config["SMTP_PORT"];
 
         //Recipients
-        $mail->setFrom( $config["NO_REPLY_EMAIL"], 'No Reply');
+        $mail->setFrom($config["NO_REPLY_EMAIL"], 'No Reply');
         $mail->addAddress($to);
 
         //Content

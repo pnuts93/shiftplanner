@@ -41,6 +41,7 @@ try {
         exit;
     }
     $otp = create_otp($conn, $user['id'], $token_type);
+    error_log("Created OTP for user " . $user['id'] . " with token type " . $token_type);
     if ($token_type === 'password_reset') {
         prepare_forgot_password($otp, $email, $config);
     } else {

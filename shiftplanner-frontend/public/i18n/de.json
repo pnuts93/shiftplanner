@@ -19,6 +19,7 @@
         "confirmation_sent": "Bestätigungslink wurde an deine Email gesendet",
         "resend_confirmation": "Bestätigungs-Email erneut senden",
         "password_forgot": "Passwort vergessen?",
+        "policy_accept": "Indem ich hier klicke, akzeptiere ich die ",
         "error": {
             "email_required": "Email notwendig",
             "email_invalid": "Email ungültig",

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -18,8 +18,6 @@ import {
   TranslatePipe,
   TranslateService,
 } from '@ngx-translate/core';
-import TranslationEN from '../../../public/i18n/en.json';
-import TranslationDE from '../../../public/i18n/de.json';
 import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../auth.service';
 import { User } from '../models';
@@ -123,7 +121,7 @@ export class UserProfileComponent {
             employmentDate: updatedProfile.employmentDate,
             hasSpecialization: updatedProfile.hasSpecialization,
             locale: updatedProfile.locale,
-          }
+          };
           this.authService.login(updatedUser);
           this.profileForm.markAsPristine();
         })
