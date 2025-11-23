@@ -4,6 +4,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
+require '../PHPMailer/src/Exception.php';
+require '../PHPMailer/src/PHPMailer.php';
+require '../PHPMailer/src/SMTP.php';
+
+
 function prepare_email_confirmation($otp, $email, $first_name, $config)
 {
     $subject = "Email Confirmation";
@@ -26,7 +31,7 @@ function prepare_forgot_password($otp, $email, $config)
     $subject = "Reset Password";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
     $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/forgot_password.html");
-    $link = "https://" .  $config["SMTP_HOST"] . "/app/reset-password.php?otp=" . urlencode($otp);
+    $link = "https://" .  $config["DOMAIN"] . "/app/reset-password.php?otp=" . urlencode($otp);
     $message = str_replace(
         ['[confirmation_link]', '[email]'],
         [$link, htmlspecialchars($email)],
@@ -37,8 +42,6 @@ function prepare_forgot_password($otp, $email, $config)
 
 function send_email($to, $subject, $message, $config)
 {
-    // Uncomment when using locally
-    //error_log("Sending email to: $to\nSubject: $subject\nMessage: $message");
 
     $mail = new PHPMailer(true);
 
@@ -49,7 +52,7 @@ function send_email($to, $subject, $message, $config)
         $mail->SMTPAuth = true;
         $mail->Username =  $config["SMTP_EMAIL"];
         $mail->Password =  $config["SMTP_PASSWORD"];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port =  $config["SMTP_PORT"];
 
         //Recipients

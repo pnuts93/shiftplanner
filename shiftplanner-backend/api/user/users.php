@@ -123,6 +123,7 @@ function add_user()
         echo json_encode(['message' => 'User registered successfully']);
     } catch (PDOException $e) {
         if ($e->getCode() === '23505') { // Unique violation
+            error_log("User registration failed: Email already registered");
             http_response_code(409);
             echo json_encode(['error' => 'Email already registered']);
         } else {

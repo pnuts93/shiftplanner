@@ -7,6 +7,7 @@ function db($config)
     $user = $config['DB_USER'];
     $pass = $config['DB_PASS'];
     $port = $config['DB_PORT'];
+
     if (empty($host) || empty($dbname) || empty($user) || empty($pass) || empty($port)) {
         http_response_code(500);
         die("Database configuration is incomplete");
@@ -17,6 +18,7 @@ function db($config)
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $conn;
     } catch (PDOException $e) {
+        error_log("Database connection failed: " . $e->getMessage());
         http_response_code(500);
         die("Database connection failed");
     }

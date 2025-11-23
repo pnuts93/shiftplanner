@@ -30,7 +30,7 @@
     },
     "recovery": {
         "password_reset": {
-            "title": "Paswswort zurücksetzen",
+            "title": "Passwort zurücksetzen",
             "send_button": "Reset-Link senden",
             "success": "Reset-Link wurde an deine Email gesendet",
             "error": "Fehler beim Senden des Reset-Links. Bitte versuche es später erneut"

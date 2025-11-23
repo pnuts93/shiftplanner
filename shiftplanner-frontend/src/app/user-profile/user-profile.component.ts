@@ -21,7 +21,7 @@ import {
 import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../auth.service';
 import { User } from '../models';
-import { CommonModule } from '@angular/common';
+
 import { environment } from '../../environments/environment';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,7 +30,6 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-user-profile',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatButtonModule,
     MatCardModule,
@@ -42,8 +41,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatSelectModule,
     ReactiveFormsModule,
     TranslateModule,
-    TranslatePipe,
-  ],
+    TranslatePipe
+],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })

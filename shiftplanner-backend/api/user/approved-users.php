@@ -84,7 +84,7 @@ function add_approved_user()
         error_log("User {$payload['user_id']} is adding approved user");
         $stmt = $conn->prepare("INSERT INTO approved_users (email, is_admin) VALUES (:email, :is_admin)");
         $stmt->execute([':email' => $email, ':is_admin' => strlen($data['isAdmin']) === 0 ? 0 : 1]);
-        error_log("User {$payload['user_id']} added approved user: $email");
+        error_log("User {$payload['user_id']} added approved user");
         http_response_code(201);
         echo json_encode(['message' => 'User added successfully']);
     } catch (PDOException $e) {

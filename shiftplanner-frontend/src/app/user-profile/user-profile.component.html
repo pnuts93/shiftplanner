@@ -28,16 +28,16 @@
         <mat-label>{{ "user.old_password" | translate }}</mat-label>
         <input matInput formControlName="oldPassword" [type]="hidePassword[0] ? 'password' : 'text'"/>
         <button
-            mat-icon-button
-            matSuffix
-            (click)="hidePassword[0] = !hidePassword[0]"
-            [attr.aria-label]="'Toggle password visibility'"
-            type="button"
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword[0] = !hidePassword[0]"
+          [attr.aria-label]="'Toggle password visibility'"
+          type="button"
           >
-            <mat-icon>{{
-              hidePassword[0] ? "visibility_off" : "visibility"
-            }}</mat-icon>
-          </button>
+          <mat-icon>{{
+            hidePassword[0] ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
       </mat-form-field>
 
       <!-- NEW PASSWORD -->
@@ -45,16 +45,16 @@
         <mat-label>{{ "user.new_password" | translate }}</mat-label>
         <input matInput formControlName="newPassword" [type]="hidePassword[1] ? 'password' : 'text'"/>
         <button
-            mat-icon-button
-            matSuffix
-            (click)="hidePassword[1] = !hidePassword[1]"
-            [attr.aria-label]="'Toggle password visibility'"
-            type="button"
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword[1] = !hidePassword[1]"
+          [attr.aria-label]="'Toggle password visibility'"
+          type="button"
           >
-            <mat-icon>{{
-              hidePassword[1] ? "visibility_off" : "visibility"
-            }}</mat-icon>
-          </button>
+          <mat-icon>{{
+            hidePassword[1] ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
       </mat-form-field>
 
       <!-- CONFIRM PASSWORD -->
@@ -62,16 +62,16 @@
         <mat-label>{{ "user.confirm_password" | translate }}</mat-label>
         <input matInput formControlName="confirmPassword" [type]="hidePassword[2] ? 'password' : 'text'"/>
         <button
-            mat-icon-button
-            matSuffix
-            (click)="hidePassword[2] = !hidePassword[2]"
-            [attr.aria-label]="'Toggle password visibility'"
-            type="button"
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword[2] = !hidePassword[2]"
+          [attr.aria-label]="'Toggle password visibility'"
+          type="button"
           >
-            <mat-icon>{{
-              hidePassword[2] ? "visibility_off" : "visibility"
-            }}</mat-icon>
-          </button>
+          <mat-icon>{{
+            hidePassword[2] ? "visibility_off" : "visibility"
+          }}</mat-icon>
+        </button>
       </mat-form-field>
 
       <!-- DATE OF EMPLOYMENT -->
@@ -83,7 +83,7 @@
           [matDatepicker]="picker"
           [max]="maxDate"
           formControlName="employmentDate"
-        />
+          />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker touchUi></mat-datepicker>
       </mat-form-field>
@@ -91,13 +91,14 @@
         <mat-select
           formControlName="locale"
           (selectionChange)="setLocale($event.value)"
-        >
-          <mat-option
-            *ngFor="let lang of availableLanguages"
-            [value]="lang.code"
           >
-            {{ lang.label }}
-          </mat-option>
+          @for (lang of availableLanguages; track lang) {
+            <mat-option
+              [value]="lang.code"
+              >
+              {{ lang.label }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <mat-checkbox formControlName="hasSpecialization">{{ "user.has_specialization" | translate }}</mat-checkbox>
@@ -106,7 +107,7 @@
         color="primary"
         type="submit"
         [disabled]="profileForm.invalid"
-      >
+        >
         {{ "profile.save" | translate }}
       </button>
     </form>

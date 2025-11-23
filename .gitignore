@@ -43,3 +43,6 @@ Thumbs.db
 
 # Environment variables
 app.ini
+
+# 3rd party libraries
+shiftplanner-backend/PHPMailer/

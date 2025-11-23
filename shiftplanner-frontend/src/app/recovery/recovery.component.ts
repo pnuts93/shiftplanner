@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,14 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-password-forgotten',
   imports: [
-    CommonModule,
     MatButtonModule,
     MatCardModule,
     MatInputModule,
     MatProgressSpinnerModule,
     ReactiveFormsModule,
-    TranslatePipe,
-  ],
+    TranslatePipe
+],
   templateUrl: './recovery.component.html',
   styleUrl: './recovery.component.css',
 })

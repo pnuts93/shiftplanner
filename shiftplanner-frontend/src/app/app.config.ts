@@ -6,7 +6,6 @@ import {
 import { provideRouter } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { routes } from './app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
@@ -24,8 +23,6 @@ import { environment } from '../environments/environment';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideAnimationsAsync(),
-    provideAnimationsAsync(),
     provideNativeDateAdapter(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideTranslateService({

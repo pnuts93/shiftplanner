@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { AuthService } from '../auth.service';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -21,7 +21,6 @@ import { environment } from '../../environments/environment';
   selector: 'app-login',
   standalone: true,
   imports: [
-    CommonModule,
     MatCardModule,
     MatCheckboxModule,
     MatDatepickerModule,
@@ -33,8 +32,8 @@ import { environment } from '../../environments/environment';
     ReactiveFormsModule,
     RouterModule,
     TranslateModule,
-    TranslatePipe,
-  ],
+    TranslatePipe
+],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
 })

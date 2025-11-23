@@ -6,7 +6,7 @@ import {
   MatDatepickerModule,
 } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { UserShiftTableComponent } from '../user-shift-table/user-shift-table.component';
 import { MatInputModule } from '@angular/material/input';
@@ -24,15 +24,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   selector: 'app-user-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
     MatInputModule,
     TranslateModule,
     TranslatePipe,
-    UserShiftTableComponent,
-  ],
+    UserShiftTableComponent
+],
   providers: [MatDatepickerModule],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',

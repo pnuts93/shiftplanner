@@ -50,7 +50,8 @@ function cors($config)
     $allowed_origins = [
         'http://localhost:4200', // Local development
         'http://127.0.0.1:4200', // Local development
-        "https://{$config['DOMAIN']}"
+        "https://{$config['DOMAIN']}",
+        "https://www.{$config['DOMAIN']}"
     ];
     if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins, true)) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");

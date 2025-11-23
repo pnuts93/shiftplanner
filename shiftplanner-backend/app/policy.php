@@ -5,15 +5,9 @@ require_once __DIR__ . '/../lib/util.php';
 
 $method = verify_method(array('GET'));
 $config = parse_ini_file("../private/app.ini");
-$payload = authenticate($config);
 $locale = $config["DEFAULT_LOCALE"];
 if (!$locale) {
     $locale = "en";
-}
-if (!$payload || $payload['role'] !== 'admin') {
-    http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
 }
 ?>
 <!DOCTYPE html>
