@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 
@@ -7,7 +6,7 @@ $config = parse_ini_file('../../private/app.ini');
 $conn = db($config);
 cors($config);
 $method = verify_method(array('GET', 'PUT'));
-$payload = authenticate($config);
+init_session($config);
 
 switch ($method) {
     case 'GET':
@@ -56,21 +55,23 @@ function get_shifts()
         http_response_code(200);
         echo json_encode($shifts);
     } catch (PDOException $e) {
+        error_log('Database error: ' . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        echo json_encode(['error' => 'Database error']);
     }
 }
 
 function upsert_shift()
 {
     global $conn;
-    global $payload;
+    global $config;
+
     header('Content-Type: application/json');
 
     // Read and decode JSON body
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($data['userId'], $data['date'], $data['shiftId'])) {
+    if (!$data || !isset($data['userId'], $data['date'], $data['shiftId'], $_SERVER['HTTP_X_CSRF_TOKEN'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit;
@@ -87,13 +88,12 @@ function upsert_shift()
         echo json_encode(['error' => 'Invalid month or year']);
         exit;
     }
-    if ($payload['role'] !== 'admin' && $payload['user_id'] !== $userId) {
+    if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN'] || ($_SESSION['role'] !== 'admin' && $_SESSION['user_id'] !== $userId)) {
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden']);
         exit;
     }
     try {
-        error_log("User {$payload['user_id']} is upserting assignment for user $userId on date $date with shift $shiftId");
         $upsert_file = fopen("upsert_assignment.sql", "r");
         $stmt = $conn->prepare(stream_get_contents($upsert_file));
         fclose($upsert_file);
@@ -105,9 +105,33 @@ function upsert_shift()
         }
         http_response_code(201);
         echo json_encode(['message' => 'Shift added successfully']);
+        // send notification if the user changed someone else's shift and has notifications enabled
+        if ($_SESSION['user_id'] !== $userId) {
+            error_log("User {$_SESSION['user_id']} created/updated assignment for user $userId on date $date with shift $shiftId");
+            $stmt = $conn->prepare("SELECT * FROM users WHERE id = :user_id");
+            $stmt->execute([':user_id' => $userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$user) {
+                http_response_code(404);
+                echo json_encode(['error' => 'User not found']);
+                exit;
+            }
+            if (boolval($user['is_notified_shift_change'])) {
+                $config_content = file_get_contents(__DIR__ . '/../../config/config-' . $user['locale'] . '.json');
+                $shift_config = json_decode($config_content, true);
+                prepare_shift_change_notification(
+                    $user['email'],
+                    $user['locale'],
+                    $date,
+                    $shift_config['shifts'][(string)$shiftId],
+                    $config
+                );
+            }
+        }
     } catch (PDOException $e) {
+        error_log('Database error: ' . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        echo json_encode(['error' => 'Database error']);
     }
 }
 

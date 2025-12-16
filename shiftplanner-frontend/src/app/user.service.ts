@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { ApprovedUser, User } from './models';
+import { ApprovedUser, User, UserProfile } from './models';
 import { environment } from '../environments/environment';
+import { getCredentialsHeader } from './utils';
 
 @Injectable({
   providedIn: 'root',
@@ -24,10 +25,7 @@ export class UserService {
   async fetchApprovedUsers(): Promise<void> {
     return fetch(`${environment.hostname}/api/user/approved-users.php`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
+      credentials: getCredentialsHeader(),
     })
       .then((response) => {
         if (!response.ok) {
@@ -43,9 +41,10 @@ export class UserService {
   async addApprovedUser(user: ApprovedUser): Promise<void> {
     return fetch(`${environment.hostname}/api/user/approved-users.php`, {
       method: 'POST',
+      credentials: getCredentialsHeader(),
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
       },
       body: JSON.stringify(user),
     }).then((response) => {
@@ -59,9 +58,10 @@ export class UserService {
   async updateApprovedUser(user: ApprovedUser): Promise<void> {
     return fetch(`${environment.hostname}/api/user/approved-users.php`, {
       method: 'PUT',
+      credentials: getCredentialsHeader(),
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
       },
       body: JSON.stringify(user),
     }).then((response) => {
@@ -74,9 +74,10 @@ export class UserService {
   async removeApprovedUser(deletedUser: ApprovedUser): Promise<void> {
     return fetch(`${environment.hostname}/api/user/approved-users.php`, {
       method: 'DELETE',
+      credentials: getCredentialsHeader(),
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
       },
       body: JSON.stringify({ email: deletedUser.email }),
     }).then((response) => {
@@ -90,17 +91,17 @@ export class UserService {
     });
   }
 
-  getUsers(): Observable<User[]> {
+  getUsers(force: boolean = false): Observable<User[]> {
+    if (force) {
+      this.fetchUsers();
+    }
     return this.users.asObservable();
   }
 
   async fetchUsers(): Promise<void> {
     return fetch(`${environment.hostname}/api/user/users.php`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
+      credentials: getCredentialsHeader(),
     })
       .then((response) => {
         if (!response.ok) {
@@ -111,5 +112,22 @@ export class UserService {
       .then((data: User[]) => {
         this.users.next(data);
       });
+  }
+
+  async updateUser(updatedUser: UserProfile): Promise<void> {
+    return fetch(`${environment.hostname}/api/user/users.php`, {
+      method: 'PUT',
+      credentials: getCredentialsHeader(),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(updatedUser),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+      return response.json();
+    });
   }
 }

@@ -1,17 +1,18 @@
 <div class="dashboard-container">
   <mat-form-field class="current-month" appearance="fill">
-    <mat-label>{{'user_dashboard.select_month' | translate}}</mat-label>
+    <mat-label>{{ "user_dashboard.select_month" | translate }}</mat-label>
     <input
       matInput
+      readonly
       [matDatepicker]="picker"
-      [(ngModel)]="selectedDate"
+      [value]="selectedDate"
       [min]="minDate"
       [max]="maxDate"
-      type="month"
     />
     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
     <mat-datepicker
       #picker
+      startView="year"
       (monthSelected)="onMonthSelected($event, picker)"
       touchUi
     ></mat-datepicker>
@@ -20,7 +21,7 @@
   <app-user-shift-table
     [users]="users"
     [days]="daysInMonth"
-    [shifts]="shiftOptions"
+    [shiftOptions$]="shiftOptions$"
     [assignmentsObservable]="shiftAssignments$"
     (shiftSelectionEvent)="onShiftUpdate($event)"
   >

@@ -47,9 +47,9 @@ export class NavbarComponent {
         this.translate.use(user.locale);
       }
     });
-    this.role = this.authService.getUser().pipe(
-      map((user) => user?.role ?? null)
-    );
+    this.role = this.authService
+      .getUser()
+      .pipe(map((user) => user?.role ?? null));
   }
 
   navigateTo(route: string) {
@@ -57,7 +57,7 @@ export class NavbarComponent {
   }
 
   logout() {
-    this.authService.logout();
+    this.authService.executeLogout();
     this.router.navigate(['/login']);
   }
 }

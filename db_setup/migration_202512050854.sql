@@ -1,0 +1,13 @@
+ALTER TABLE users ADD COLUMN login_attempts INTEGER DEFAULT 0 NOT NULL;
+ALTER TABLE users ADD COLUMN is_notified_shift_change BOOLEAN DEFAULT TRUE NOT NULL;
+ALTER TABLE approved_users ADD COLUMN is_counted BOOLEAN DEFAULT TRUE NOT NULL;
+
+CREATE TABLE suspicious_activities (
+    id UUID PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    remote_ip VARCHAR(45) NOT NULL,
+    forwarded_for VARCHAR(45) NOT NULL,
+    activity_type VARCHAR(100) NOT NULL,
+    confirmed BOOLEAN DEFAULT FALSE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);

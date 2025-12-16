@@ -7,16 +7,31 @@ export interface User {
   locale: string;
   email: string;
   role?: string;
+  isCounted: boolean;
+}
+
+export interface UserProfile {
+  email: string;
+  fname: string;
+  lname: string;
+  employmentDate: string;
+  hasSpecialization: boolean;
+  locale: string;
+  oldPassword?: string;
+  newPassword?: string;
 }
 
 export interface ApprovedUser {
   email: string;
   isAdmin: boolean;
+  isCounted: boolean;
 }
 
 export interface ShiftOption {
   id: number;
-  label: string;
+  name: string;
+  display: string;
+  isWorking: boolean;
 }
 
 export interface Assignment {

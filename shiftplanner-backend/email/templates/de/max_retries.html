@@ -1,0 +1,77 @@
+<!DOCTYPE PUBLIC “-//W3C//DTD XHTML 1.0 Transitional//EN” “https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd”>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+        <title></title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: auto;
+                background-color: #1e1a1d;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: white;
+            }
+            p {
+                color: #cccccc;
+            }
+            a {
+                color: #ffabf3;
+                text-decoration: none;
+            }
+            button {
+                background-color: black;
+                color: #ffabf3;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #333;
+            }
+            b {
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Zu viele Anmeldeversuche</h1>
+            <p>Hallo,</p>
+            <p>
+                Es wurden zu viele Anmeldeversuche für Ihr Konto unternommen.
+                Aus Sicherheitsgründen wurde der Zugriff vorübergehend gesperrt.
+            </p>
+            <p>
+                Wenn Sie versucht haben, sich anzumelden, und Ihr Konto
+                entsperren möchten, folgen Sie bitte
+                <a href="[max_retries_link]&block=false">diesem Link</a>. Wenn
+                Sie Ihr Passwort nicht mehr wissen, können Sie es auf der
+                Anmeldeseite
+                <b>nachdem Sie Ihr Konto entsperrt haben</b> zurücksetzen.
+            </p>
+            <p>
+                Wenn Sie <b>nicht</b> versucht haben, sich anzumelden, folgen
+                Sie bitte
+                <a href="[max_retries_link]&block=true">diesem Link</a>. Dies
+                wird die Person, die diese Anmeldeversuche unternommen hat,
+                vollständig daran hindern, mit der App zu interagieren.
+                Kontaktieren Sie bitte einen Administrator, um rechtliche
+                Schritte einzuleiten und ggf. den Vorfall den Behörden zu
+                melden.
+            </p>
+            <p>Mit freundlichen Grüßen,<br />Shiftplanner App</p>
+        </div>
+    </body>
+</html>

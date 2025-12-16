@@ -63,6 +63,7 @@ export class AdminDashboardComponent {
     this.emailForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       isAdmin: false,
+      isCounted: true,
     });
     this.allowedUsers$ = this.userService.getApprovedUsers();
     this.authService.user$.subscribe((user) => {
@@ -76,11 +77,12 @@ export class AdminDashboardComponent {
     const newUser: ApprovedUser = {
       email: this.emailForm.value.email.trim(),
       isAdmin: this.emailForm.value.isAdmin,
+      isCounted: this.emailForm.value.isCounted,
     };
 
     this.userService.addApprovedUser(newUser).then(() => {
       this.emailForm.reset();
-      this.emailForm.patchValue({ isAdmin: false });
+      this.emailForm.patchValue({ isAdmin: false, isCounted: true });
     });
   }
 
@@ -93,13 +95,14 @@ export class AdminDashboardComponent {
     }
     this.userService.removeApprovedUser(deletedUser).then(() => {
       if (this.user && this.user.email === deletedUser.email) {
-        this.authService.logout();
+        this.authService.executeLogout();
       }
     });
   }
 
-  toggleAdmin(user: ApprovedUser): void {
+  toggleAttribute(user: ApprovedUser): void {
     this.userService.updateApprovedUser(user);
+    this.userService.getUsers(true);
   }
 
   canBeRemoved(approvedUser: ApprovedUser): boolean {

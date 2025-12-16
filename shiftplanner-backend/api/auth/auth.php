@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 
@@ -7,16 +6,16 @@ $config = parse_ini_file('../../private/app.ini');
 $conn = db($config);
 cors($config);
 verify_method(array('GET'));
-$payload = authenticate($config);
-
+init_session($config);
+error_log("config holds session info" . implode(", ", array_keys($config, "session*")));
 // Fetch data from Database
 try {
-    $stmt = $conn->prepare("SELECT users.id, users.email, users.fname, users.lname, users.employment_date, users.has_specialization, users.locale, approved_users.is_admin FROM users INNER JOIN approved_users ON users.email=approved_users.email WHERE users.email = :email");
-    $stmt->execute([':email' => $payload['email']]);
+    $stmt = $conn->prepare("SELECT users.id, users.email, users.fname, users.lname, users.employment_date, users.has_specialization, users.locale, approved_users.is_admin, approved_users.is_counted FROM users INNER JOIN approved_users ON users.email=approved_users.email WHERE users.id = :id");
+    $stmt->execute([':id' => $_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$user || $user['id'] !== $payload['user_id']) {
+    if (!$user) {
         http_response_code(401);
-        echo json_encode(['error' => 'Invalid token']);
+        echo json_encode(['error' => 'User not found']);
         exit;
     }
     $role = $user['is_admin'] ? 'admin' : 'user';
@@ -30,7 +29,8 @@ try {
             'employmentDate' => $user['employment_date'],
             'hasSpecialization' => $user['has_specialization'],
             'locale' => $user['locale'],
-            'role' => $role
+            'role' => $role,
+            'isCounted' => boolval($user['is_counted'])
         ]
     ]);
 } catch (PDOException $e) {

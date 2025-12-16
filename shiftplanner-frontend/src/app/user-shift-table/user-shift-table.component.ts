@@ -11,10 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule } from '@angular/material/table';
 import { Assignment, ShiftOption, User } from '../models';
 import { MatSelectModule } from '@angular/material/select';
-import {
-  TranslateModule,
-  TranslatePipe,
-} from '@ngx-translate/core';
+import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../auth.service';
 import { Observable, of } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -37,7 +34,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class UserShiftTableComponent implements OnChanges {
   @Input({ required: true }) users: User[] = [];
   @Input({ required: true }) days: string[] = [];
-  @Input({ required: true }) shifts: ShiftOption[] = [];
+  @Input({ required: true }) shiftOptions$: Observable<ShiftOption[]> = of([]);
   @Input({ required: true }) assignmentsObservable: Observable<
     Record<number, Record<string, number>>
   > = of({});
@@ -53,6 +50,7 @@ export class UserShiftTableComponent implements OnChanges {
   @Output() shiftSelectionEvent = new EventEmitter<Assignment>();
 
   headers: string[] = [];
+  shifts: ShiftOption[] = [];
 
   constructor(private authService: AuthService) {
     this.authService.user$.subscribe((user) => {
@@ -66,7 +64,7 @@ export class UserShiftTableComponent implements OnChanges {
   onSelect(user: User, date: string, shiftId: number) {
     let oldShiftId = this.currentAssignments[user.id][date];
     this.currentAssignments[user.id][date] = shiftId;
-    if (oldShiftId === shiftId) {
+    if (oldShiftId === shiftId || !user.isCounted) {
       return;
     } else if (this.isUserExperienced(user, this.parseDate(date))) {
       if (this.experiencedShiftCount[date][oldShiftId] > 0) {
@@ -75,12 +73,12 @@ export class UserShiftTableComponent implements OnChanges {
       this.experiencedShiftCount[date][shiftId]++;
     }
     if (
-      this.isWorkingShift(oldShiftId) &&
+      this.shifts.find((s) => s.id === oldShiftId)?.isWorking &&
       this.shiftCount[oldShiftId][date] > 0
     ) {
       this.shiftCount[oldShiftId][date]--;
     }
-    if (this.isWorkingShift(shiftId)) {
+    if (this.shifts.find((s) => s.id === shiftId)?.isWorking) {
       this.shiftCount[shiftId][date]++;
     }
     this.shiftSelectionEvent.emit({ userId: user.id, date, shiftId });
@@ -93,6 +91,9 @@ export class UserShiftTableComponent implements OnChanges {
       this.calculateExperiencedShiftCount();
       this.calculateShiftCount();
     });
+    this.shiftOptions$.subscribe((shiftOptions) => {
+      this.shifts = shiftOptions;
+    });
   }
 
   getShiftCounts(shiftId: number): Record<string, number> {
@@ -101,6 +102,9 @@ export class UserShiftTableComponent implements OnChanges {
     for (const day of this.days) {
       let count = 0;
       for (const user of this.users) {
+        if (!user.isCounted) {
+          continue;
+        }
         const userShifts = this.currentAssignments[user.id];
         if (userShifts && userShifts[day] === shiftId) {
           count++;
@@ -115,7 +119,7 @@ export class UserShiftTableComponent implements OnChanges {
   calculateShiftCount() {
     this.shiftCount = {};
     for (const shift of this.shifts) {
-      if (!this.isWorkingShift(shift.id)) {
+      if (!shift.isWorking) {
         continue;
       }
       this.shiftCount[shift.id] = this.getShiftCounts(shift.id);
@@ -126,7 +130,7 @@ export class UserShiftTableComponent implements OnChanges {
     let date = this.parseDate(stringDate);
     let count = 0;
     for (const user of this.users) {
-      if (!this.isUserExperienced(user, date)) {
+      if (!this.isUserExperienced(user, date) || !user.isCounted) {
         continue;
       }
       const userShifts = this.currentAssignments[user.id];
@@ -142,17 +146,13 @@ export class UserShiftTableComponent implements OnChanges {
     for (const day of this.days) {
       this.experiencedShiftCount[day] = {};
       for (const shift of this.shifts) {
-        if (!this.isWorkingShift(shift.id)) {
+        if (!shift.isWorking) {
           continue;
         }
         this.experiencedShiftCount[day][shift.id] =
           this.getNumberExperiencedShift(day, shift.id);
       }
     }
-  }
-
-  isWorkingShift(shiftId: number): boolean {
-    return shiftId === 1 || shiftId === 2 || shiftId === 3;
   }
 
   canEditShift(userId: number) {
@@ -193,7 +193,7 @@ export class UserShiftTableComponent implements OnChanges {
   getAvailableShifts(user: User, date: string): ShiftOption[] {
     return this.shifts.filter((shift) => {
       if (
-        !this.isWorkingShift(shift.id) ||
+        !shift.isWorking ||
         this.currentAssignments[user.id]?.[date] === shift.id
       ) {
         return true;

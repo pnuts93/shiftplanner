@@ -1,0 +1,57 @@
+{
+    "shifts": 
+        [{
+            "id": 0,
+            "name": "none",
+            "display": "- Option wählen -",
+            "isWorking": false
+        },
+        {
+            "id": 1,
+            "name": "early",
+            "display": "Frühdienst",
+            "isWorking": true
+        },
+        {
+            "id": 2,
+            "name": "late",
+            "display": "Spätdienst",
+            "isWorking": true
+        },
+        {
+            "id": 3,
+            "name": "night",
+            "display": "Nachtdienst",
+            "isWorking": true
+        },
+        {
+            "id": 4,
+            "name": "training",
+            "display": "Fortbildung",
+            "isWorking": false
+        },
+        {
+            "id": 5,
+            "name": "vacation",
+            "display": "Urlaub",
+            "isWorking": false
+        },
+        {
+            "id": 6,
+            "name": "pa",
+            "display": "PA",
+            "isWorking": false
+        },
+        {
+            "id": 7,
+            "name": "aag",
+            "display": "AAG",
+            "isWorking": false
+        },
+        {
+            "id": 8,
+            "name": "freiwunsch",
+            "display": "Freiwunsch",
+            "isWorking": false
+        }]
+}

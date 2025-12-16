@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { Assignment, ShiftOption, User } from './models';
 import { environment } from '../environments/environment';
 import { UserService } from './user.service';
+import { getCredentialsHeader } from './utils';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +17,9 @@ export class ShiftService {
     Assignment[]
   >([]);
   private users: User[] = [];
+  private shiftOptions: BehaviorSubject<ShiftOption[]> = new BehaviorSubject<
+    ShiftOption[]
+  >([]);
 
   constructor(private userService: UserService) {
     this.userService.getUsers().subscribe((fetchedUsers) => {
@@ -23,15 +27,27 @@ export class ShiftService {
     });
   }
 
-  getShiftOptions(): ShiftOption[] {
-    return [
-      { id: 0, label: 'none' },
-      { id: 1, label: 'early' },
-      { id: 2, label: 'late' },
-      { id: 3, label: 'night' },
-      { id: 4, label: 'vacation' },
-      { id: 5, label: 'training' },
-    ];
+  getShiftOptions(): Observable<ShiftOption[]> {
+    if (this.shiftOptions.getValue().length > 0) {
+      return this.shiftOptions.asObservable();
+    }
+    fetch(`${environment.hostname}/api/shift/shift_options.php`, {
+      method: 'GET',
+      credentials: getCredentialsHeader(),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch shift options');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        this.shiftOptions.next(data.shifts as ShiftOption[]);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+    return this.shiftOptions.asObservable();
   }
 
   getAssignments(
@@ -47,10 +63,7 @@ export class ShiftService {
       `${environment.hostname}/api/shift/assignments.php?year=${year}&month=${month}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
+        credentials: getCredentialsHeader(),
       }
     )
       .then((response) => {
@@ -89,17 +102,17 @@ export class ShiftService {
   async updateAssignment(assignment: Assignment): Promise<void> {
     return fetch(`${environment.hostname}/api/shift/assignments.php`, {
       method: 'PUT',
+      credentials: getCredentialsHeader(),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
       },
       body: JSON.stringify(assignment),
-    })
-    .then((response) => {
+    }).then((response) => {
       if (!response.ok) {
         throw new Error('Failed to update assignment');
       }
-    })
+    });
   }
 
   assignmentsToRecord(
@@ -112,7 +125,9 @@ export class ShiftService {
       }
       let date = new Date(assignment.date);
       // Ensure date is in YYYY-MM-DD format
-      let formattedDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      let formattedDate = `${date.getFullYear()}-${
+        date.getMonth() + 1
+      }-${date.getDate()}`;
       record[assignment.userId][formattedDate] = assignment.shiftId;
     });
     return record;

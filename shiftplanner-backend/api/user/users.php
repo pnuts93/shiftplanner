@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
 require_once __DIR__ . '/../../email/send-email.php';
@@ -27,12 +26,11 @@ switch ($method) {
 
 function get_users()
 {
-
     global $conn;
     global $config;
-    authenticate($config);
+    init_session($config);
     try {
-        $stmt = $conn->prepare("SELECT * FROM users ORDER BY fname");
+        $stmt = $conn->prepare("SELECT u.*, a.is_counted FROM users u JOIN approved_users a ON u.email = a.email ORDER BY fname");
         $stmt->execute();
         $users = [];
         while ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
@@ -44,15 +42,17 @@ function get_users()
                     'lname' => $user['lname'],
                     'employmentDate' => $user['employment_date'],
                     'hasSpecialization' => $user['has_specialization'],
-                    'locale' => $user['locale']
+                    'locale' => $user['locale'],
+                    'isCounted' => $user['is_counted']
                 ];
             }
         }
         http_response_code(200);
         echo json_encode($users);
     } catch (PDOException $e) {
+        error_log('Database error: ' . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        echo json_encode(['error' => 'Database error']);
     }
 }
 
@@ -60,6 +60,7 @@ function add_user()
 {
     global $conn;
     global $config;
+    init_session($config, false);
     header('Content-Type: application/json');
 
     // Read and decode JSON body
@@ -104,8 +105,7 @@ function add_user()
         $stmt = $conn->prepare("
         INSERT INTO users (email, password, fname, lname, employment_date, has_specialization, locale)
         VALUES (:email, :password, :fname, :lname, :employment_date, :has_specialization, :locale)
-        RETURNING *
-    ");
+        RETURNING *");
         $stmt->execute([
             ':email' => $email,
             ':password' => $hashedPassword,
@@ -127,8 +127,9 @@ function add_user()
             http_response_code(409);
             echo json_encode(['error' => 'Email already registered']);
         } else {
+            error_log('Database error: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+            echo json_encode(['error' => 'Database error']);
         }
     }
 }
@@ -137,20 +138,23 @@ function update_user()
 {
     global $conn;
     global $config;
-    $payload = authenticate($config);
+    init_session($config);
     header('Content-Type: application/json');
 
     // Read and decode JSON body
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'], $data['locale'])) {
+    if (!$data || !isset($data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'], $data['locale'], $_SERVER['HTTP_X_CSRF_TOKEN'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit;
+    } else if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN']) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden']);
+        exit;
     }
-
     // Sanitize and extract input
-    $email = trim($payload['email']);
+    $email = trim($_SESSION['email']);
     $fname = trim($data['fname']);
     $lname = trim($data['lname']);
     $employment_date = $data['employmentDate'];
@@ -186,7 +190,7 @@ function update_user()
             }
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+            echo json_encode(['error' => 'Database error']);
             exit;
         }
     }
@@ -217,8 +221,9 @@ function update_user()
         http_response_code(200);
         echo json_encode(['message' => 'Profile updated successfully']);
     } catch (PDOException $e) {
+        error_log('Database error: ' . $e->getMessage());
         http_response_code(500);
-        echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
+        echo json_encode(['error' => 'Database error']);
         exit;
     }
 }

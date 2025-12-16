@@ -1,66 +1,7 @@
 <?php
 
-// Generate JWT
-function generate_jwt($user_id, $email, $role, $config)
+function verify_method(array $allowed_methods)
 {
-    $secret_key = $config['JWT_SECRET_KEY'];
-    $expiration_time = isset($config['JWT_EXPIRATION_TIME']) ? intval($config['JWT_EXPIRATION_TIME']) : 3600;
-    $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
-    $payload = json_encode([
-        'user_id' => $user_id,
-        'email' => $email,
-        'role' => $role,
-        'exp' => time() + $expiration_time
-    ]);
-    $base64UrlHeader = base64UrlEncode($header);
-    $base64UrlPayload = base64UrlEncode($payload);
-    $signature = hash_hmac('sha256', $base64UrlHeader . '.' . $base64UrlPayload, $secret_key, true);
-    $base64UrlSignature = base64UrlEncode($signature);
-    return $base64UrlHeader . '.' . $base64UrlPayload . '.' . $base64UrlSignature;
-}
-
-function base64UrlEncode($text)
-{
-    return str_replace(
-        ['+', '/', '='],
-        ['-', '_', ''],
-        base64_encode($text)
-    );
-}
-
-function base64UrlDecode($input) {
-    $remainder = strlen($input) % 4;
-    if ($remainder) {
-        $padlen = 4 - $remainder;
-        $input .= str_repeat('=', $padlen);
-    }
-    return base64_decode(strtr($input, '-_', '+/'));
-}
-
-// Validate JWT
-function validate_jwt($config, $jwt)
-{
-    $secret_key = $config['JWT_SECRET_KEY'];
-    if (strpos($jwt, 'Bearer ') === 0) {
-        $jwt = substr($jwt, 7);
-    }
-    $parts = explode('.', $jwt);
-    if (count($parts) !== 3) {
-        return null;
-    }
-    list($header, $payload, $signature) = $parts;
-    $expected_signature = hash_hmac('sha256', "$header.$payload", $secret_key, true);
-    if (!hash_equals(base64UrlEncode($expected_signature), $signature)) {
-        return null;
-    }
-    $payload_data = json_decode(base64UrlDecode($payload), true);
-    if (isset($payload_data['exp']) && $payload_data['exp'] < time()) {
-        return null;
-    }
-    return $payload_data;
-}
-
-function verify_method(array $allowed_methods) {
     $method = $_SERVER['REQUEST_METHOD'];
     if (!in_array($method, $allowed_methods)) {
         http_response_code(405);
@@ -70,25 +11,40 @@ function verify_method(array $allowed_methods) {
     return $method;
 }
 
-function authenticate($config) {
-    $token = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : null;
-    if ($token === null) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Unauthorized']);
-        exit;
-    }
-    $token_payload = validate_jwt($config, $token);
-    if ($token_payload === null) {
-        http_response_code(401);
-        echo json_encode(['error' => 'Invalid token']);
-        exit;
-    }
-    return $token_payload;
-}
-
-function create_otp($conn, $user_id, $token_type) {
+function create_otp($conn, $user_id, $token_type)
+{
     $otp = bin2hex(random_bytes(16));
     $stmt = $conn->prepare("INSERT INTO one_time_tokens (token, user_id, expires_at, token_type) VALUES (:otp, :user_id, NOW() + INTERVAL '30 MINUTES', :token_type)");
     $stmt->execute([':otp' => $otp, ':user_id' => $user_id, ':token_type' => $token_type]);
     return $otp;
+}
+
+function get_login_attempts($conn, $email)
+{
+    $stmt = $conn->prepare("SELECT login_attempts FROM users WHERE email = :email");
+    $stmt->execute([':email' => $email]);
+    return $stmt->fetchColumn();
+}
+
+function increase_login_attempts($conn, $user_id)
+{
+    $stmt = $conn->prepare("UPDATE users SET login_attempts = login_attempts + 1 WHERE id = :user_id RETURNING login_attempts");
+    $stmt->execute([':user_id' => $user_id]);
+    return $stmt->fetchColumn();
+}
+
+function reset_login_attempts($conn, $user_id)
+{
+    $stmt = $conn->prepare("UPDATE users SET login_attempts = 0 WHERE id = :user_id");
+    $stmt->execute([':user_id' => $user_id]);
+}
+
+function uuidv4()
+{
+    $data = random_bytes(16);
+
+    $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
+    $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
+
+    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }

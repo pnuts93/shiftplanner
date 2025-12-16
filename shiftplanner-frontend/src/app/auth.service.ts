@@ -3,6 +3,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { User } from './models';
 import { environment } from '../environments/environment';
 import { EmailNotConfirmedError } from './errors';
+import { getCredentialsHeader } from './utils';
 
 @Injectable({
   providedIn: 'root',
@@ -45,9 +46,7 @@ export class AuthService {
     }
     return fetch(`${environment.hostname}/api/auth/auth.php`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: getCredentialsHeader(),
     })
       .then((response) => {
         if (!response.ok) {
@@ -69,6 +68,7 @@ export class AuthService {
           hasSpecialization: data.user.hasSpecialization,
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
+          isCounted: data.user.isCounted,
         };
         return user;
       })
@@ -80,6 +80,7 @@ export class AuthService {
   async executeLogin(email: string, password: string): Promise<void> {
     return fetch(`${environment.hostname}/api/auth/login.php`, {
       method: 'POST',
+      credentials: getCredentialsHeader(),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -105,8 +106,21 @@ export class AuthService {
           hasSpecialization: data.user.hasSpecialization,
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
+          isCounted: data.user.isCounted,
         };
         this.login(user);
       });
+  }
+
+  async executeLogout(): Promise<void> {
+    return fetch(`${environment.hostname}/api/auth/logout.php`, {
+      method: 'GET',
+      credentials: getCredentialsHeader(),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+      this.logout();
+    });
   }
 }

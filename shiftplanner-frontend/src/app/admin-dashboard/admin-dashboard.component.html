@@ -1,56 +1,72 @@
 <mat-card class="admin-card">
   <mat-card-header>
-    <mat-card-title>{{ 'admin.title' | translate }}</mat-card-title>
+    <mat-card-title>{{ "admin.title" | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <form [formGroup]="emailForm" (ngSubmit)="addUser()">
-      <mat-form-field appearance="outline" class="full-width">
+      <mat-form-field appearance="outline" class="email-input">
         <mat-label>Email</mat-label>
         <input
           matInput
           formControlName="email"
           placeholder="user@example.com"
-          />
+        />
       </mat-form-field>
 
       <mat-checkbox formControlName="isAdmin">Admin</mat-checkbox>
+      <mat-checkbox formControlName="isCounted">Count</mat-checkbox>
 
       <button
         mat-raised-button
         color="primary"
         type="submit"
         [disabled]="emailForm.invalid"
-        >
-        {{ 'admin.add' | translate }}
+      >
+        {{ "admin.add" | translate }}
       </button>
     </form>
 
     <mat-divider></mat-divider>
 
     @if (allowedUsers$ | async; as allowedUsers) {
-      <div>
-        @for (user of allowedUsers; track user) {
-          <div class="user-list-item">
-            <p class="user-email" matListItemTitle>{{ user.email }}</p>
-            <mat-slide-toggle
-              [(ngModel)]="user.isAdmin"
-              (change)="toggleAdmin(user)"
-              [disabled]="!canBeRemoved(user)"
-              class="admin-toggle"
-              ngDefaultControl
-              matListItemLine
-              >
-              Admin
-            </mat-slide-toggle>
-            <button class="delete-button" mat-icon-button color="warn" (click)="removeUser(user)" [disabled]="!canBeRemoved(user)" matListItemIcon>
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        }
+    <div>
+      <div class="user-list-header">
+        <p class="user-email" matListItemTitle>Email</p>
+        <p matListItemLine>Admin</p>
+        <p matListItemLine>Count</p>
+        <p matListItemIcon>Delete</p>
       </div>
+      @for (user of allowedUsers; track user) {
+      <div class="user-list-item">
+        <p class="user-email" matListItemTitle>{{ user.email }}</p>
+        <mat-slide-toggle
+          [(ngModel)]="user.isAdmin"
+          (change)="toggleAttribute(user)"
+          [disabled]="!canBeRemoved(user)"
+          ngDefaultControl
+          matListItemLine
+        />
+        <mat-slide-toggle
+          [(ngModel)]="user.isCounted"
+          (change)="toggleAttribute(user)"
+          ngDefaultControl
+          matListItemLine
+        />
+        <button
+          class="delete-button"
+          mat-icon-button
+          color="warn"
+          (click)="removeUser(user)"
+          [disabled]="!canBeRemoved(user)"
+          matListItemIcon
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      }
+    </div>
     } @else {
-      <p>No allowed users yet.</p>
+    <p>No allowed users yet.</p>
     }
-
   </mat-card-content>
 </mat-card>

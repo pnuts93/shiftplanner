@@ -20,11 +20,12 @@ import {
 } from '@ngx-translate/core';
 import { MatSelectModule } from '@angular/material/select';
 import { AuthService } from '../auth.service';
-import { User } from '../models';
+import { User, UserProfile } from '../models';
 
 import { environment } from '../../environments/environment';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -41,8 +42,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatSelectModule,
     ReactiveFormsModule,
     TranslateModule,
-    TranslatePipe
-],
+    TranslatePipe,
+  ],
   templateUrl: './user-profile.component.html',
   styleUrl: './user-profile.component.css',
 })
@@ -69,7 +70,8 @@ export class UserProfileComponent {
 
   constructor(
     private translate: TranslateService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) {
     this.authService.user$.subscribe((user) => {
       if (user) {
@@ -96,38 +98,41 @@ export class UserProfileComponent {
   }
 
   onSubmit(): void {
-    if (this.profileForm.valid) {
-      const updatedProfile = this.profileForm.value;
-      fetch(`${environment.hostname}/api/user/users.php`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(updatedProfile),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('Failed to update profile');
-          }
-          return response.json();
-        })
-        .then(() => {
-          const updatedUser: User = {
-            ...this.user!,
-            fname: updatedProfile.fname,
-            lname: updatedProfile.lname,
-            employmentDate: updatedProfile.employmentDate,
-            hasSpecialization: updatedProfile.hasSpecialization,
-            locale: updatedProfile.locale,
-          };
-          this.authService.login(updatedUser);
-          this.profileForm.markAsPristine();
-        })
-        .catch((_) => {
-          console.error('Error updating profile');
-        });
+    if (!this.profileForm.valid) {
+      return;
     }
+    const updatedProfile = this.profileForm.value;
+    let date = new Date(updatedProfile.employmentDate);
+    let utc = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    updatedProfile.employmentDate = utc.toISOString().split('T')[0];
+    let userProfile: UserProfile = {
+      email: this.email,
+      fname: updatedProfile.fname,
+      lname: updatedProfile.lname,
+      employmentDate: updatedProfile.employmentDate,
+      hasSpecialization: updatedProfile.hasSpecialization,
+      locale: updatedProfile.locale,
+      oldPassword: updatedProfile.oldPassword,
+      newPassword: updatedProfile.newPassword,
+    };
+    this.userService
+      .updateUser(userProfile)
+      .then(() => {
+        const updatedUser: User = {
+          ...this.user!,
+          fname: updatedProfile.fname,
+          lname: updatedProfile.lname,
+          employmentDate: updatedProfile.employmentDate,
+          hasSpecialization: updatedProfile.hasSpecialization,
+          locale: updatedProfile.locale,
+        };
+        this.authService.login(updatedUser);
+        this.profileForm.markAsPristine();
+      })
+      .catch((_) => {
+        console.error('Error updating profile');
+      });
+    this.userService.getUsers(true);
   }
 
   setLocale(locale: string): void {

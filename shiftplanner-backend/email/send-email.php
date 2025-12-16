@@ -4,9 +4,9 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require '../PHPMailer/src/Exception.php';
-require '../PHPMailer/src/PHPMailer.php';
-require '../PHPMailer/src/SMTP.php';
+require __DIR__ . '/../PHPMailer/src/Exception.php';
+require __DIR__ . '/../PHPMailer/src/PHPMailer.php';
+require __DIR__ . '/../PHPMailer/src/SMTP.php';
 
 
 function prepare_email_confirmation($otp, $email, $first_name, $config)
@@ -23,7 +23,11 @@ function prepare_email_confirmation($otp, $email, $first_name, $config)
         [$link, htmlspecialchars($first_name)],
         $message
     );
-    send_email($email, $subject, $message, $config);
+    if ($config["ENV"] === "dev") {
+        error_log("Email content for email confirmation: " . $message);
+    } else {
+        send_email($email, $subject, $message, $config);
+    }
 }
 
 function prepare_forgot_password($otp, $email, $config)
@@ -37,7 +41,52 @@ function prepare_forgot_password($otp, $email, $config)
         [$link, htmlspecialchars($email)],
         $message
     );
-    send_email($email, $subject, $message, $config);
+    if ($config["ENV"] === "dev") {
+        error_log("Email content for forgot password: " . $message);
+    } else {
+        send_email($email, $subject, $message, $config);
+    }
+}
+
+function prepare_max_retries($to, $config, $uuid)
+{
+    $subject = "Too Many Login Attempts";
+    $locale = $config["DEFAULT_LOCALE"] ?? "en";
+    $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/max_retries.html");
+    if ($message === false) {
+        $message = file_get_contents(__DIR__ . "/templates/en/max_retries.html");
+    }
+    $message = str_replace(
+        ['[max_retries_link]'],
+        ["https://" . $config["DOMAIN"] . "/app/max-retries-confirmation.php?uuid=" . urlencode($uuid)],
+        $message
+    );
+    if ($config["ENV"] === "dev") {
+        error_log("Email content for max retries: " . $message);
+    } else {
+        send_email($to, $subject, $message, $config);
+    }
+}
+
+function prepare_shift_change_notification($to, $locale, $shift_date, $shift_type, $config)
+{
+    $subject = "Shift Assignment Notification";
+    $locale = $config["DEFAULT_LOCALE"] ?? "en";
+    $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/shift_change_notification.html");
+    if ($message === false) {
+        $message = file_get_contents(__DIR__ . "/templates/en/shift_change_notification.html");
+    }
+    $formatted_date = date('d.m.Y', strtotime($shift_date));
+    $message = str_replace(
+        ['[shift_date]', '[shift_type]'],
+        [htmlspecialchars($formatted_date), htmlspecialchars($shift_type)],
+        $message
+    );
+    if ($config["ENV"] === "dev") {
+        error_log("Email content for shift change: " . $message);
+    } else {
+        send_email($to, $subject, $message, $config);
+    }
 }
 
 function send_email($to, $subject, $message, $config)

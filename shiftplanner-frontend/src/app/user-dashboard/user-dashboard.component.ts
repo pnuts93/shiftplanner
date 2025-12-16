@@ -10,7 +10,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { UserShiftTableComponent } from '../user-shift-table/user-shift-table.component';
 import { MatInputModule } from '@angular/material/input';
-import moment, { Moment } from 'moment';
 import {
   TranslateModule,
   TranslatePipe,
@@ -30,19 +29,19 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatInputModule,
     TranslateModule,
     TranslatePipe,
-    UserShiftTableComponent
-],
+    UserShiftTableComponent,
+  ],
   providers: [MatDatepickerModule],
   templateUrl: './user-dashboard.component.html',
   styleUrl: './user-dashboard.component.css',
 })
 export class UserDashboardComponent implements OnInit {
   users: User[] = [];
-  shiftOptions: ShiftOption[] = [];
+  shiftOptions$: Observable<ShiftOption[]> = of([]);
   shiftAssignments$: Observable<Record<number, Record<string, number>>> = of(
     {}
   );
-  selectedDate = moment();
+  selectedDate: Date;
   daysInMonth: string[] = [];
   minDate: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   maxDate: Date = new Date(
@@ -57,24 +56,41 @@ export class UserDashboardComponent implements OnInit {
     private translate: TranslateService,
     private userService: UserService
   ) {
+    let tmpDate = new Date();
+    this.selectedDate = new Date(tmpDate.getFullYear(), tmpDate.getMonth(), 1);
   }
 
   ngOnInit() {
     this.loadData();
   }
 
-  onMonthSelected(date: Moment, datepicker: MatDatepicker<Date>) {
-    this.selectedDate = date;
+  onMonthSelected(date: Date, datepicker: MatDatepicker<Date>) {
+    console.log('Selected month:', date);
+    if (
+      date.getMonth() === this.selectedDate.getMonth() &&
+      date.getFullYear() === this.selectedDate.getFullYear()
+    ) {
+      datepicker.close();
+      return;
+    }
+    this.selectedDate = new Date(date.getFullYear(), date.getMonth(), 1);
     datepicker.close();
     this.loadData();
   }
 
   loadData(force: boolean = false) {
-    const [year, month] = [this.selectedDate.year(), this.selectedDate.month()];
+    const [year, month] = [
+      this.selectedDate.getFullYear(),
+      this.selectedDate.getMonth(),
+    ];
     this.daysInMonth = this.generateDaysInMonth(year, month);
     this.userService.getUsers().subscribe((users) => (this.users = users));
-    this.shiftOptions = this.shiftService.getShiftOptions();
-    this.shiftAssignments$ = this.shiftService.getAssignments(year, month, force);
+    this.shiftOptions$ = this.shiftService.getShiftOptions();
+    this.shiftAssignments$ = this.shiftService.getAssignments(
+      year,
+      month,
+      force
+    );
   }
 
   generateDaysInMonth(year: number, month: number): string[] {
@@ -84,8 +100,7 @@ export class UserDashboardComponent implements OnInit {
   }
 
   onShiftUpdate(assignment: Assignment) {
-    this.shiftService.updateAssignment(assignment)
-    .catch((_) => {
+    this.shiftService.updateAssignment(assignment).catch((_) => {
       this.snackbar.open(
         this.translate.instant('user_dashboard.update_failed'),
         undefined,

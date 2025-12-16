@@ -1,4 +1,5 @@
 export const environment = {
-    hostname: "http://localhost:8000",
-    defaultLocale: 'de',
+  hostname: 'http://localhost:8000',
+  dev: true,
+  defaultLocale: 'de',
 };

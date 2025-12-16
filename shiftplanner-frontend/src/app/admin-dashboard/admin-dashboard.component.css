@@ -1,25 +1,44 @@
 mat-card > * {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 form > * {
-    margin: 0.5rem;
+  margin: 0.5rem;
 }
 
 mat-card-title {
-    color: white;
+  color: white;
 }
 
 p.user-email {
-    width: 40vw;
-    overflow: scroll;
-    color: white;
+  width: 40vw;
+  overflow: auto;
+  color: white;
 }
 
 .user-list-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem;
-    border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.user-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.user-list-header p {
+  font-weight: bold;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .email-input {
+    width: 75vw;
+  }
 }

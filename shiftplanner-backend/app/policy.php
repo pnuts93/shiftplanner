@@ -5,6 +5,7 @@ require_once __DIR__ . '/../lib/util.php';
 
 $method = verify_method(array('GET'));
 $config = parse_ini_file("../private/app.ini");
+init_session($config, false);
 $locale = $config["DEFAULT_LOCALE"];
 if (!$locale) {
     $locale = "en";

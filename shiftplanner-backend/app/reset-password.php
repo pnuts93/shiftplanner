@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../lib/auth.php';
-require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../lib/util.php';
 
 $method = verify_method(array('POST', 'GET'));
 $config = parse_ini_file("../private/app.ini");
+init_session($config, false);
 $conn = db($config);
 $locale = $config["DEFAULT_LOCALE"];
 if (!$locale) {

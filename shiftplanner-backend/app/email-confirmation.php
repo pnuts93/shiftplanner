@@ -14,13 +14,14 @@ $content = [
     ]
 ];
 $config = parse_ini_file('../private/app.ini');
+init_session($config, false);
 $locale = $config["DEFAULT_LOCALE"];
 if (!$locale) {
     $locale = "en";
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="<?php echo htmlspecialchars($locale); ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -43,7 +44,6 @@ if (!$locale) {
 
 <body>
     <?php
-    require_once __DIR__ . '/../config/db.php';
     require_once __DIR__ . '/../lib/util.php';
     require_once __DIR__ . '/../lib/auth.php';
 
