@@ -7,7 +7,8 @@
         "fname": "First name",
         "lname": "Last name",
         "date_employment": "Date of employment",
-        "has_specialization": "I have a specialization"
+        "has_specialization": "I have a specialization",
+        "is_notified": "Notify me about shift changes"
     },
     "title": "Shift Planner",
     "navbar": {
@@ -67,5 +68,46 @@
         "title": "Manage Users",
         "add": "Add",
         "warning": "Are you sure you want to remove {{email}} from the allowed users?"
+    },
+    "help_page": {
+        "title": "Help",
+        "introduction": {
+            "title": "Introduction",
+            "content": "The Shift Planner is a tool developed to facilitate the planning of shift preferences. Users can specify their availability, and administrators can use this information to create shift schedules efficiently."
+        },
+        "user_guide": {
+            "title": "User Guide",
+            "features": {
+                "dashboard": {
+                    "title": "User Dashboard",
+                    "content": "View and manage your shift preferences for the current and upcoming months. Select your preferred shifts and submit them for scheduling. Available shifts:"
+                },
+                "profile": {
+                    "title": "Profile",
+                    "content": "Manage your personal information and settings. Update your account details, change your password, and adjust your notification preferences.",
+                    "rules": "Passwords must be at least 8 characters long. Updated personal data are saved as soon as you click 'Save'."
+                },
+                "security": {
+                    "title": "General Security Information",
+                    "content": "The app is secured by the following measures: Email confirmation upon registration, secure password storage using hashing and salting, HTTPS encryption for all data transfers, maximum login attempts to prevent brute-force attacks, and password reset functionality.",
+                    "rules": "Your profile will be locked after 3 failed login attempts: you will then be emailed to confirm if you are responsible. If not, the attacker's IP address will be blacklisted. To unlock your profile, you must click a link in the email."
+                }
+            }
+        },
+        "admin_guide": {
+            "title": "Administrator Guide",
+            "features": {
+                "dashboard": {
+                    "title": "User Dashboard",
+                    "content": "As an administrator, you can view and manage shift preferences. Users are notified when you adjust their shifts.",
+                    "rules": "The rules in the user guide section also apply here."
+                },
+                "admin-dashboard": {
+                    "title": "Admin Dashboard",
+                    "content": "As an administrator, you can add, manage and remove authorized users.",
+                    "rules": "To allow new users to register, you must add their email addresses to the list of authorized users. You can decide whether the user is an administrator and whether the user is counted when calculating the number of users in a shift. An administrator can only delete normal users, not other administrators. An administrator can only make themselves a normal user, and this is allowed if there is at least one other administrator."
+                }
+            }
+        }
     }
 }

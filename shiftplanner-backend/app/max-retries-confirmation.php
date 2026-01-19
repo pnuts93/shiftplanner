@@ -61,10 +61,12 @@ $isBlock = $_GET['block'] === 'true';
         <?php
         try {
             if ($isBlock) {
-                $stmt = $conn->prepare("UPDATE suspicious_activities SET confirmed = TRUE WHERE id = :uuid RETURNING remote_ip");
+                $stmt = $conn->prepare("UPDATE suspicious_activities SET confirmed = TRUE WHERE id = :uuid RETURNING *");
                 $stmt->execute([':uuid' => $uuid]);
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($result) {
+                    error_log("Unblock action for user_id: " . $result['user_id']);
+                    reset_login_attempts($conn, $result['user_id']);
                     $remote_ip = $result['remote_ip'];
                     add_to_blacklist($remote_ip);
                     http_response_code(200);

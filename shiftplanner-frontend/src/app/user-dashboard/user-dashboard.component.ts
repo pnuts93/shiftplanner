@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Assignment, ShiftOption, User } from '../models';
+import { Assignment, Configuration, ShiftOption, User } from '../models';
 import { ShiftService } from '../shift.service';
 import {
   MatDatepicker,
@@ -18,6 +18,8 @@ import {
 import { UserService } from '../user.service';
 import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfigurationService } from '../configuration.service';
+import { emptyConfig } from '../utils';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -37,7 +39,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 })
 export class UserDashboardComponent implements OnInit {
   users: User[] = [];
-  shiftOptions$: Observable<ShiftOption[]> = of([]);
+  configuration$: Observable<Configuration> = of(emptyConfig());
   shiftAssignments$: Observable<Record<number, Record<string, number>>> = of(
     {}
   );
@@ -52,6 +54,7 @@ export class UserDashboardComponent implements OnInit {
   private snackbar = inject(MatSnackBar);
 
   constructor(
+    private configurationService: ConfigurationService,
     private shiftService: ShiftService,
     private translate: TranslateService,
     private userService: UserService
@@ -85,7 +88,7 @@ export class UserDashboardComponent implements OnInit {
     ];
     this.daysInMonth = this.generateDaysInMonth(year, month);
     this.userService.getUsers().subscribe((users) => (this.users = users));
-    this.shiftOptions$ = this.shiftService.getShiftOptions();
+    this.configuration$ = this.configurationService.getConfiguration();
     this.shiftAssignments$ = this.shiftService.getAssignments(
       year,
       month,

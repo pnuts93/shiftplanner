@@ -144,7 +144,7 @@ function update_user()
     // Read and decode JSON body
     $data = json_decode(file_get_contents('php://input'), true);
 
-    if (!$data || !isset($data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'], $data['locale'], $_SERVER['HTTP_X_CSRF_TOKEN'])) {
+    if (!$data || !isset($data['fname'], $data['lname'], $data['employmentDate'], $data['hasSpecialization'], $data['locale'], $data['isNotified'], $_SERVER['HTTP_X_CSRF_TOKEN'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit;
@@ -159,6 +159,7 @@ function update_user()
     $lname = trim($data['lname']);
     $employment_date = $data['employmentDate'];
     $has_specialization = strlen($data['hasSpecialization']) === 0 ? 0 : 1;
+    $is_notified = strlen($data['isNotified']) === 0 ? 0 : 1;
     $locale = $data['locale'];
 
     // Validate input data
@@ -197,24 +198,26 @@ function update_user()
 
     try {
         if (isset($hashedNewPassword)) {
-            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, password = :password, locale = :locale WHERE email = :email");
+            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, is_notified_shift_change = :is_notified, password = :password, locale = :locale WHERE email = :email");
             $stmt->execute([
                 ':email' => $email,
                 ':fname' => $fname,
                 ':lname' => $lname,
                 ':employment_date' => $employment_date,
                 ':has_specialization' => $has_specialization,
+                ':is_notified' => $is_notified,
                 ':password' => $hashedNewPassword,
                 ':locale' => $locale
             ]);
         } else {
-            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, locale = :locale WHERE email = :email");
+            $stmt = $conn->prepare("UPDATE users SET fname = :fname, lname = :lname, employment_date = :employment_date, has_specialization = :has_specialization, is_notified_shift_change = :is_notified, locale = :locale WHERE email = :email");
             $stmt->execute([
                 ':email' => $email,
                 ':fname' => $fname,
                 ':lname' => $lname,
                 ':employment_date' => $employment_date,
                 ':has_specialization' => $has_specialization,
+                ':is_notified' => $is_notified,
                 ':locale' => $locale
             ]);
         }

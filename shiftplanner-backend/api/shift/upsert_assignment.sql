@@ -10,7 +10,7 @@ expert_count AS (
   SELECT COUNT(*) AS expert_count
   FROM existing_assignments
   WHERE has_specialization = true
-     OR employment_date <= CURRENT_DATE - INTERVAL '5 years'
+     OR employment_date <= CURRENT_DATE - CAST(:experienced_years_threshold AS INTERVAL)
 ),
 assignment_count AS (
   SELECT COUNT(*) AS total FROM existing_assignments
@@ -25,11 +25,12 @@ can_insert AS (
   SELECT
     is_counted = false 
     OR (
-      assignment_count.total < 4
+      assignment_count.total < :max_people_per_shift
       AND (
         new_user_info.has_specialization = true
-        OR expert_count.expert_count >= 1
-        OR assignment_count.total < 3
+        OR new_user_info.employment_date <= CURRENT_DATE - CAST(:experienced_years_threshold AS INTERVAL)
+        OR expert_count.expert_count >= :min_experts_per_shift
+        OR assignment_count.total < (:max_people_per_shift - 1)
       )
     ) AS allowed
   FROM assignment_count, expert_count, new_user_info

@@ -92,6 +92,7 @@ try {
             'lname' => $user['lname'],
             'employmentDate' => $user['employment_date'],
             'hasSpecialization' => $user['has_specialization'],
+            'isNotified' => boolval($user['is_notified_shift_change']),
             'locale' => $user['locale'],
             'role' => $role
         ]

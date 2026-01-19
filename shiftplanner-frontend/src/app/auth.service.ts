@@ -69,6 +69,7 @@ export class AuthService {
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
           isCounted: data.user.isCounted,
+          isNotified: data.user.isNotified,
         };
         return user;
       })
@@ -107,6 +108,7 @@ export class AuthService {
           locale: data.user.locale || environment.defaultLocale,
           role: data.user.role,
           isCounted: data.user.isCounted,
+          isNotified: data.user.isNotified,
         };
         this.login(user);
       });

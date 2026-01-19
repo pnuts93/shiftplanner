@@ -72,9 +72,9 @@ function prepare_shift_change_notification($to, $locale, $shift_date, $shift_typ
 {
     $subject = "Shift Assignment Notification";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
-    $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/shift_change_notification.html");
+    $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/shift_assignment.html");
     if ($message === false) {
-        $message = file_get_contents(__DIR__ . "/templates/en/shift_change_notification.html");
+        $message = file_get_contents(__DIR__ . "/templates/en/shift_assignment.html");
     }
     $formatted_date = date('d.m.Y', strtotime($shift_date));
     $message = str_replace(

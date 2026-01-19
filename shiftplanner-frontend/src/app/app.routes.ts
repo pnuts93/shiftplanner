@@ -7,13 +7,14 @@ import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.compo
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import { map, Observable } from 'rxjs';
 import { RecoveryComponent } from './recovery/recovery.component';
+import { HelpPageComponent } from './help-page/help-page.component';
 
 const roleGuard = (requiredRoles: string[]) => {
   return (): Observable<boolean> => {
     const authService = inject(AuthService);
     const router = inject(Router);
     return authService.getUser().pipe(
-      map(user => {
+      map((user) => {
         if (user && user.role && requiredRoles.includes(user.role)) {
           return true;
         }
@@ -41,5 +42,10 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminDashboardComponent,
     canActivate: [roleGuard(['admin'])],
+  },
+  {
+    path: 'help',
+    component: HelpPageComponent,
+    canActivate: [roleGuard(['user', 'admin'])],
   },
 ];

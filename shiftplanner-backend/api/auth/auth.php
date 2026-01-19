@@ -10,7 +10,7 @@ init_session($config);
 error_log("config holds session info" . implode(", ", array_keys($config, "session*")));
 // Fetch data from Database
 try {
-    $stmt = $conn->prepare("SELECT users.id, users.email, users.fname, users.lname, users.employment_date, users.has_specialization, users.locale, approved_users.is_admin, approved_users.is_counted FROM users INNER JOIN approved_users ON users.email=approved_users.email WHERE users.id = :id");
+    $stmt = $conn->prepare("SELECT users.id, users.email, users.fname, users.lname, users.employment_date, users.has_specialization, users.locale, users.is_notified_shift_change, approved_users.is_admin, approved_users.is_counted FROM users INNER JOIN approved_users ON users.email=approved_users.email WHERE users.id = :id");
     $stmt->execute([':id' => $_SESSION['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$user) {
@@ -30,7 +30,8 @@ try {
             'hasSpecialization' => $user['has_specialization'],
             'locale' => $user['locale'],
             'role' => $role,
-            'isCounted' => boolval($user['is_counted'])
+            'isCounted' => boolval($user['is_counted']),
+            'isNotified' => boolval($user['is_notified_shift_change'])
         ]
     ]);
 } catch (PDOException $e) {

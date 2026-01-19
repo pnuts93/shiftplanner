@@ -21,7 +21,7 @@
   <app-user-shift-table
     [users]="users"
     [days]="daysInMonth"
-    [shiftOptions$]="shiftOptions$"
+    [configuration$]="configuration$"
     [assignmentsObservable]="shiftAssignments$"
     (shiftSelectionEvent)="onShiftUpdate($event)"
   >

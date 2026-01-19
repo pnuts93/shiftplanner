@@ -1,0 +1,50 @@
+<section class="help-page">
+  <h1>{{ "help_page.title" | translate }}</h1>
+  <h2>{{ "help_page.introduction.title" | translate }}</h2>
+  <p>{{ "help_page.introduction.content" | translate }}</p>
+  <h2>{{ "help_page.user_guide.title" | translate }}</h2>
+  <h3>{{ "help_page.user_guide.features.dashboard.title" | translate }}</h3>
+  <p>{{ "help_page.user_guide.features.dashboard.content" | translate }}</p>
+  <mat-list role="list">
+    @for (shift_option of configuration.shifts; track shift_option) {
+      @if (shift_option.id != 0) {
+        <mat-list-item role="listitem">
+          <span matListItemTitle>{{ shift_option.display }}</span>
+          <mat-icon matListItemIcon>{{
+            getIconForShift(shift_option)
+          }}</mat-icon>
+        </mat-list-item>
+      }
+    }
+  </mat-list>
+  <p>
+    {{
+      "help_page.user_guide.features.dashboard.rules"
+        | translate
+          : {
+              min_users: configuration.minExpertsPerShift,
+              max_users: configuration.maxPeoplePerShift,
+              min_experience: configuration.experiencedYearsThreshold,
+            }
+    }}
+  </p>
+  <h3>{{ "help_page.user_guide.features.profile.title" | translate }}</h3>
+  <p>{{ "help_page.user_guide.features.profile.content" | translate }}</p>
+  <p>{{ "help_page.user_guide.features.profile.rules" | translate }}</p>
+  <h3>{{ "help_page.user_guide.features.security.title" | translate }}</h3>
+  <p>{{ "help_page.user_guide.features.security.content" | translate }}</p>
+  <p>{{ "help_page.user_guide.features.security.rules" | translate }}</p>
+  <h2>{{ "help_page.admin_guide.title" | translate }}</h2>
+  <h3>{{ "help_page.admin_guide.features.dashboard.title" | translate }}</h3>
+  <p>{{ "help_page.admin_guide.features.dashboard.content" | translate }}</p>
+  <p>{{ "help_page.admin_guide.features.dashboard.rules" | translate }}</p>
+  <h3>
+    {{ "help_page.admin_guide.features.admin-dashboard.title" | translate }}
+  </h3>
+  <p>
+    {{ "help_page.admin_guide.features.admin-dashboard.content" | translate }}
+  </p>
+  <p>
+    {{ "help_page.admin_guide.features.admin-dashboard.rules" | translate }}
+  </p>
+</section>

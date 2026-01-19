@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../lib/util.php';
 require_once __DIR__ . '/../../lib/auth.php';
+require_once __DIR__ . '/../../email/send-email.php';
 
 $config = parse_ini_file('../../private/app.ini');
 $conn = db($config);
@@ -94,10 +95,12 @@ function upsert_shift()
         exit;
     }
     try {
+        $config_content = file_get_contents(__DIR__ . '/../../config/config.json');
+        $shift_config = json_decode($config_content, true);
         $upsert_file = fopen("upsert_assignment.sql", "r");
         $stmt = $conn->prepare(stream_get_contents($upsert_file));
         fclose($upsert_file);
-        $stmt->execute([':user_id' => $userId, ':shift_date' => $date, ':shift_id' => $shiftId]);
+        $stmt->execute([':user_id' => $userId, ':shift_date' => $date, ':shift_id' => $shiftId, ':max_people_per_shift' => $shift_config['maxPeoplePerShift'], ':min_experts_per_shift' => $shift_config['minExpertsPerShift'], ':experienced_years_threshold' => $shift_config['experiencedYearsThreshold'] . ' years']);
         if ($stmt->rowCount() === 0) {
             http_response_code(409);
             echo json_encode(['error' => 'Shift could not be updated']);
@@ -117,13 +120,11 @@ function upsert_shift()
                 exit;
             }
             if (boolval($user['is_notified_shift_change'])) {
-                $config_content = file_get_contents(__DIR__ . '/../../config/config-' . $user['locale'] . '.json');
-                $shift_config = json_decode($config_content, true);
                 prepare_shift_change_notification(
                     $user['email'],
                     $user['locale'],
                     $date,
-                    $shift_config['shifts'][(string)$shiftId],
+                    $shift_config['shifts'][$shiftId]["display"],
                     $config
                 );
             }

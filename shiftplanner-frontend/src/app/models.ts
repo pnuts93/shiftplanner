@@ -8,6 +8,7 @@ export interface User {
   email: string;
   role?: string;
   isCounted: boolean;
+  isNotified: boolean;
 }
 
 export interface UserProfile {
@@ -16,6 +17,7 @@ export interface UserProfile {
   lname: string;
   employmentDate: string;
   hasSpecialization: boolean;
+  isNotified: boolean;
   locale: string;
   oldPassword?: string;
   newPassword?: string;
@@ -32,6 +34,13 @@ export interface ShiftOption {
   name: string;
   display: string;
   isWorking: boolean;
+}
+
+export interface Configuration {
+  shifts: ShiftOption[];
+  experiencedYearsThreshold: number;
+  maxPeoplePerShift: number;
+  minExpertsPerShift: number;
 }
 
 export interface Assignment {

@@ -53,5 +53,8 @@
             "name": "freiwunsch",
             "display": "Freiwunsch",
             "isWorking": false
-        }]
+        }],
+    "experiencedYearsThreshold": 5,
+    "maxPeoplePerShift": 4,
+    "minExpertsPerShift": 1
 }

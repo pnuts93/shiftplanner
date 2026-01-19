@@ -1,7 +1,9 @@
 <mat-toolbar>
   <mat-toolbar-row>
     <div class="filler"></div>
-    <a routerLink="/"><h1>{{ 'title' | translate }}</h1></a>
+    <a routerLink="/"
+      ><h1>{{ "title" | translate }}</h1></a
+    >
     <div class="tools">
       @if (role | async) {
       <button
@@ -14,7 +16,7 @@
       <mat-menu #menu="matMenu">
         <button mat-menu-item (click)="navigateTo('/profile')">
           <mat-icon>person</mat-icon>
-          <span>{{ 'navbar.profile' | translate }}</span>
+          <span>{{ "navbar.profile" | translate }}</span>
         </button>
         @if ((role | async) === 'admin') {
         <button mat-menu-item (click)="navigateTo('/admin')">
@@ -25,6 +27,10 @@
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Logout</span>
+        </button>
+        <button mat-menu-item (click)="navigateTo('/help')">
+          <mat-icon>help</mat-icon>
+          <span>Help</span>
         </button>
       </mat-menu>
       }

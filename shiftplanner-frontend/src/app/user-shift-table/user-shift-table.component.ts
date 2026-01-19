@@ -9,12 +9,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule } from '@angular/material/table';
-import { Assignment, ShiftOption, User } from '../models';
+import { Assignment, Configuration, ShiftOption, User } from '../models';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../auth.service';
 import { Observable, of } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { emptyConfig } from '../utils';
 
 @Component({
   selector: 'app-user-shift-table',
@@ -34,7 +35,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class UserShiftTableComponent implements OnChanges {
   @Input({ required: true }) users: User[] = [];
   @Input({ required: true }) days: string[] = [];
-  @Input({ required: true }) shiftOptions$: Observable<ShiftOption[]> = of([]);
+  @Input({ required: true }) configuration$: Observable<Configuration> = of(
+    emptyConfig()
+  );
   @Input({ required: true }) assignmentsObservable: Observable<
     Record<number, Record<string, number>>
   > = of({});
@@ -47,6 +50,8 @@ export class UserShiftTableComponent implements OnChanges {
   /* ShiftId -> Date -> Count | different from experienced shift count due to data retrieval in table */
   shiftCount: Record<number, Record<string, number>> = {};
   experiencedYearsThreshold: number = 5; // Years of experience to be considered experienced
+  maxPeoplePerShift: number = 4;
+  minExpertsPerShift: number = 1;
   @Output() shiftSelectionEvent = new EventEmitter<Assignment>();
 
   headers: string[] = [];
@@ -86,13 +91,19 @@ export class UserShiftTableComponent implements OnChanges {
 
   ngOnChanges() {
     this.headers = ['Name', ...this.days];
+    this.users = [...this.users];
     this.assignmentsObservable.subscribe((assignments) => {
       this.currentAssignments = assignments;
       this.calculateExperiencedShiftCount();
       this.calculateShiftCount();
     });
-    this.shiftOptions$.subscribe((shiftOptions) => {
-      this.shifts = shiftOptions;
+    this.configuration$.subscribe((configuration) => {
+      this.shifts = configuration.shifts;
+      this.experiencedYearsThreshold = configuration.experiencedYearsThreshold;
+      this.maxPeoplePerShift = configuration.maxPeoplePerShift;
+      this.minExpertsPerShift = configuration.minExpertsPerShift;
+      this.calculateExperiencedShiftCount();
+      this.calculateShiftCount();
     });
   }
 
@@ -199,10 +210,11 @@ export class UserShiftTableComponent implements OnChanges {
         return true;
       }
       return (
-        (this.shiftCount[shift.id][date] < 3 ||
-          this.experiencedShiftCount[date][shift.id] > 0 ||
+        (this.shiftCount[shift.id][date] < this.maxPeoplePerShift - 1 ||
+          this.experiencedShiftCount[date][shift.id] >=
+            this.minExpertsPerShift ||
           this.isUserExperienced(user, this.parseDate(date))) &&
-        this.shiftCount[shift.id][date] < 4
+        this.shiftCount[shift.id][date] < this.maxPeoplePerShift
       );
     });
   }

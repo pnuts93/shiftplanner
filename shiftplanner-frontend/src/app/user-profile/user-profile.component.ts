@@ -58,6 +58,7 @@ export class UserProfileComponent {
     confirmPassword: [''],
     employmentDate: [new Date(), Validators.required],
     hasSpecialization: false,
+    isNotified: true,
     locale: [environment.defaultLocale, Validators.required],
   });
   email: string = ''; // set this from the auth state
@@ -89,6 +90,7 @@ export class UserProfileComponent {
             confirmPassword: [''],
             employmentDate: [user.employmentDate, Validators.required],
             hasSpecialization: [user.hasSpecialization, Validators.required],
+            isNotified: [user.isNotified, Validators.required],
             locale: [user.locale, Validators.required],
           },
           { validators: [this.oldPasswordValidator, this.newPasswordValidator] }
@@ -111,6 +113,7 @@ export class UserProfileComponent {
       lname: updatedProfile.lname,
       employmentDate: updatedProfile.employmentDate,
       hasSpecialization: updatedProfile.hasSpecialization,
+      isNotified: updatedProfile.isNotified,
       locale: updatedProfile.locale,
       oldPassword: updatedProfile.oldPassword,
       newPassword: updatedProfile.newPassword,
@@ -124,6 +127,7 @@ export class UserProfileComponent {
           lname: updatedProfile.lname,
           employmentDate: updatedProfile.employmentDate,
           hasSpecialization: updatedProfile.hasSpecialization,
+          isNotified: updatedProfile.isNotified,
           locale: updatedProfile.locale,
         };
         this.authService.login(updatedUser);

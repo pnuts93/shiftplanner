@@ -1,0 +1,19 @@
+:8080 {
+
+	# ---- PHP handling ----
+
+	# Option 1: PHP via FastCGI (php-fpm)
+	# Uncomment this block if you're using php-fpm
+	# php_fastcgi unix//run/php/php-fpm.sock
+	# php_fastcgi 127.0.0.1:9000
+
+	# Option 2: PHP via HTTP PHP server on port 8000
+	@php {
+		path *.php
+	}
+	reverse_proxy @php 127.0.0.1:8000
+
+	# ---- Default frontend proxy ----
+	# Everything else goes to port 4200 (e.g. Angular dev server)
+	reverse_proxy 127.0.0.1:4200
+}

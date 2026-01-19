@@ -17,37 +17,11 @@ export class ShiftService {
     Assignment[]
   >([]);
   private users: User[] = [];
-  private shiftOptions: BehaviorSubject<ShiftOption[]> = new BehaviorSubject<
-    ShiftOption[]
-  >([]);
 
   constructor(private userService: UserService) {
     this.userService.getUsers().subscribe((fetchedUsers) => {
       this.users = fetchedUsers;
     });
-  }
-
-  getShiftOptions(): Observable<ShiftOption[]> {
-    if (this.shiftOptions.getValue().length > 0) {
-      return this.shiftOptions.asObservable();
-    }
-    fetch(`${environment.hostname}/api/shift/shift_options.php`, {
-      method: 'GET',
-      credentials: getCredentialsHeader(),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch shift options');
-        }
-        return response.json();
-      })
-      .then((data) => {
-        this.shiftOptions.next(data.shifts as ShiftOption[]);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-    return this.shiftOptions.asObservable();
   }
 
   getAssignments(
