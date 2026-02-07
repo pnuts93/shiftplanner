@@ -141,3 +141,26 @@ function db($config)
         die("Database connection failed");
     }
 }
+
+function check_is_valid_date(DateTime $target_date, $conn, $config, $isWriteOperation = true)
+{
+    $month_offset = $config['MAX_MONTH_OFFSET'];
+    $min_date = \DateTime::createFromFormat('Y-m-d', date('Y') . '-' . date('m') . '-01');
+    $max_date = clone $min_date;
+    $max_date->modify("+$month_offset months");
+    if ($target_date < $min_date || $target_date > $max_date) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Date is outside the allowed range']);
+        exit(0);
+    }
+    if ($isWriteOperation) {
+        $stmt = $conn->prepare("SELECT * FROM month_blockers WHERE month = :month AND year = :year");
+        $stmt->execute([':month' => $target_date->format('m'), ':year' => $target_date->format('Y')]);
+        $blocker = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($blocker) {
+            http_response_code(423);
+            echo json_encode(['error' => 'Resource is locked for the specified month and year']);
+            exit(0);
+        }
+    }
+}

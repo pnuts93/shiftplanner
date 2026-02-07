@@ -1,62 +1,105 @@
 <section class="table-container">
   @if (!isRecordEmpty(currentAssignments)) {
-  <table mat-table [dataSource]="users">
-    <ng-container matColumnDef="Name" sticky="true">
-      <th mat-header-cell *matHeaderCellDef>
-        {{ "user_dashboard.user" | translate }}
-      </th>
-      <td mat-cell *matCellDef="let user">{{ user.fname }} {{ user.lname }}</td>
-      <td mat-footer-cell *matFooterCellDef></td>
-    </ng-container>
+    <table mat-table [dataSource]="users">
+      <ng-container matColumnDef="Name" sticky="true">
+        <th mat-header-cell *matHeaderCellDef>
+          {{ "user_dashboard.user" | translate }}
+        </th>
+        <td
+          mat-cell
+          *matCellDef="let user"
+          [class.expert-name-cell]="isUserExperiencedMonthStart(user)"
+        >
+          {{ user.fname }} {{ user.lname }}
+        </td>
+        <td mat-footer-cell *matFooterCellDef></td>
+      </ng-container>
 
-    @for (day of days; track day) {
-    <ng-container [matColumnDef]="day">
-      <th mat-header-cell *matHeaderCellDef>{{ day | date : "dd" }}</th>
-      <td mat-cell *matCellDef="let user">
-        <mat-form-field appearance="fill">
-          <mat-select
-            [value]="currentAssignments[user.id][day]"
-            (selectionChange)="onSelect(user, day, $event.value)"
-            [disabled]="!canEditShift(user.id)"
+      @for (day of days; track day) {
+        <ng-container [matColumnDef]="day">
+          <th
+            mat-header-cell
+            *matHeaderCellDef
+            [style.background-color]="isHoliday(day) ? '#791c55' : 'inherit'"
           >
-            @for (shift of getAvailableShifts(user, day); track shift) {
-            <mat-option [value]="shift.id">{{ shift.display }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      </td>
-      <td mat-footer-cell *matFooterCellDef>
-        @for (shift of shifts; track shift) {
-        <div>
-          @if (shift.isWorking) {
-          {{ shift.display }}:
-          <b>{{ shiftCount[shift.id][day] || 0 }}</b>
-          }
-        </div>
-        } @for (shift of shifts; track shift) {
-        <div>
-          @if (shift.isWorking) {
-          {{ "user_dashboard.n_experienced" | translate }}
-          {{ shift.display }}:
-          <b>{{ experiencedShiftCount[day][shift.id] }}</b>
-          }
-        </div>
-        }
-      </td>
-    </ng-container>
-    }
+            {{ day | date: "E dd" }}
+          </th>
+          <td mat-cell *matCellDef="let user">
+            <div class="shift-cell">
+              <mat-form-field appearance="fill">
+                <mat-select
+                  [value]="currentAssignments[user.id][day].shiftId"
+                  (selectionChange)="onSelect(user, day, $event.value)"
+                  (opened)="onOpenShiftOption(user, day)"
+                  [disabled]="!canEditShift(user.id)"
+                >
+                  @for (
+                    shift of getShiftsForSelect(user, day);
+                    track shift.id
+                  ) {
+                    <mat-option [value]="shift.id">{{
+                      shift.displayName
+                    }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              @let isMarkedImportant = this.isMarkedImportant(user.id, day);
+              @let isCommented = this.isCommented(user.id, day);
+              @let canEdit = canEditShiftAttributes(user.id, day);
+              <button
+                matIconButton
+                (click)="toggleImportant(user.id, day)"
+                [disabled]="!canEdit"
+              >
+                <mat-icon [class.toggled-button]="isMarkedImportant">{{
+                  isMarkedImportant ? "star" : "star_border"
+                }}</mat-icon>
+              </button>
 
-    <tr mat-header-row *matHeaderRowDef="headers; sticky: true"></tr>
-    <tr mat-row *matRowDef="let row; columns: headers"></tr>
-    <tr
-      mat-footer-row
-      *matFooterRowDef="headers; sticky: true"
-      class="summary-row"
-    ></tr>
-  </table>
+              <button
+                matIconButton
+                (click)="openCommentDialog(user.id, day, canEdit)"
+                [disabled]="!canEdit && !isCommented"
+              >
+                <mat-icon [class.toggled-button]="isCommented">{{
+                  isCommented ? "comment" : "add_comment"
+                }}</mat-icon>
+              </button>
+            </div>
+          </td>
+          <td mat-footer-cell *matFooterCellDef>
+            @for (shift of shifts; track shift) {
+              <div>
+                @if (shift.isWorkingShift) {
+                  {{ shift.displayName }}:
+                  <b>{{ shiftCount[shift.id][day] || 0 }}</b>
+                }
+              </div>
+            }
+            @for (shift of shifts; track shift) {
+              <div>
+                @if (shift.isWorkingShift) {
+                  {{ "user_dashboard.n_experienced" | translate }}
+                  {{ shift.displayName }}:
+                  <b>{{ experiencedShiftCount[day][shift.id] }}</b>
+                }
+              </div>
+            }
+          </td>
+        </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="headers; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: headers"></tr>
+      <tr
+        mat-footer-row
+        *matFooterRowDef="headers; sticky: true"
+        class="summary-row"
+      ></tr>
+    </table>
   } @else {
-  <div class="loading">
-    <mat-spinner></mat-spinner>
-  </div>
+    <div class="loading">
+      <mat-spinner></mat-spinner>
+    </div>
   }
 </section>

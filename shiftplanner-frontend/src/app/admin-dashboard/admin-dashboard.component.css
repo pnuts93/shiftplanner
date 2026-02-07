@@ -2,6 +2,10 @@ mat-card > * {
   padding: 1rem;
 }
 
+p {
+  color: white;
+}
+
 form > * {
   margin: 0.5rem;
 }
@@ -34,11 +38,18 @@ p.user-email {
 
 .user-list-header p {
   font-weight: bold;
-  color: white;
 }
 
 @media (max-width: 768px) {
   .email-input {
     width: 75vw;
   }
+}
+
+.month-blocker {
+  width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }

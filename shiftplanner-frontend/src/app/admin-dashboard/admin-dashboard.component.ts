@@ -22,9 +22,12 @@ import {
   TranslateService,
 } from '@ngx-translate/core';
 import { AuthService } from '../auth.service';
-import { ApprovedUser, User } from '../models';
+import { ApprovedUser, Configuration, MonthBlocker, User } from '../models';
 import { UserService } from '../user.service';
 import { Observable } from 'rxjs';
+import { ConfigurationService } from '../configuration.service';
+import { MonthBlockerService } from '../month-blocker.service';
+import { emptyConfig } from '../utils';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -53,11 +56,16 @@ export class AdminDashboardComponent {
   emailForm!: FormGroup;
   fb: FormBuilder;
   user: User | null = null;
+  configuration: Configuration = emptyConfig();
+  monthBlockers: MonthBlocker[] = [];
+  availableMonths: { year: number; month: number }[] = [];
 
   constructor(
     private translate: TranslateService,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private configurationService: ConfigurationService,
+    private monthBlockerService: MonthBlockerService,
   ) {
     this.fb = inject(FormBuilder);
     this.emailForm = this.fb.group({
@@ -69,6 +77,24 @@ export class AdminDashboardComponent {
     this.authService.user$.subscribe((user) => {
       if (user) {
         this.user = user;
+      }
+    });
+    this.monthBlockerService.getMonthBlockers().subscribe((monthBlockers) => {
+      this.monthBlockers = monthBlockers;
+    });
+    this.configurationService.getConfiguration().subscribe((config) => {
+      this.configuration = config;
+      this.availableMonths = [];
+      for (let i = 0; i < config.maxMonthOffset; i++) {
+        const date = new Date(
+          new Date().getFullYear(),
+          new Date().getMonth() + i,
+          1,
+        );
+        this.availableMonths.push({
+          year: date.getFullYear(),
+          month: date.getMonth() + 1,
+        });
       }
     });
   }
@@ -88,7 +114,7 @@ export class AdminDashboardComponent {
 
   removeUser(deletedUser: ApprovedUser): void {
     const confirmation = confirm(
-      this.translate.instant('admin.warning', { email: deletedUser.email })
+      this.translate.instant('admin.warning', { email: deletedUser.email }),
     );
     if (!confirmation) {
       return;
@@ -110,5 +136,23 @@ export class AdminDashboardComponent {
       this.user !== null &&
       (this.user.email === approvedUser.email || !approvedUser.isAdmin)
     );
+  }
+
+  toggleMonthBlocker(year: number, month: number): void {
+    if (this.isMonthBlocked(year, month)) {
+      this.monthBlockerService.deleteMonthBlocker(year, month);
+    } else {
+      this.monthBlockerService.createMonthBlocker(year, month);
+    }
+  }
+
+  isMonthBlocked(year: number, month: number): boolean {
+    return this.monthBlockers.some(
+      (mb) => mb.year === year && mb.month === month,
+    );
+  }
+
+  toDate(year: number, month: number): Date {
+    return new Date(year, month, 0);
   }
 }

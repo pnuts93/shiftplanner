@@ -6,6 +6,7 @@ import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'app-help-page',
@@ -15,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
     TranslatePipe,
     MatListModule,
     MatIconModule,
+    MatTableModule,
   ],
   templateUrl: './help-page.component.html',
   styleUrl: './help-page.component.css',
@@ -29,6 +31,6 @@ export class HelpPageComponent {
   }
 
   getIconForShift(shift_option: ShiftOption): 'work' | 'person' {
-    return shift_option.isWorking ? 'work' : 'person';
+    return shift_option.isWorkingShift ? 'work' : 'person';
   }
 }

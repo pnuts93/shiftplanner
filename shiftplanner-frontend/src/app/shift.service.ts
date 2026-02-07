@@ -3,7 +3,8 @@ import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { Assignment, ShiftOption, User } from './models';
 import { environment } from '../environments/environment';
 import { UserService } from './user.service';
-import { getCredentialsHeader } from './utils';
+import { getCredentialsHeader, handleFetchError } from './utils';
+import { ConflictError, LockedError } from './errors';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,7 @@ import { getCredentialsHeader } from './utils';
 export class ShiftService {
   /** UserId -> Date -> ShiftId */
   private assignmentRecords = new ReplaySubject<
-    Record<number, Record<string, number>>
+    Record<number, Record<string, Assignment>>
   >(1);
   private assignments: BehaviorSubject<Assignment[]> = new BehaviorSubject<
     Assignment[]
@@ -27,30 +28,26 @@ export class ShiftService {
   getAssignments(
     year: number,
     month: number,
-    force: boolean = false
-  ): Observable<Record<number, Record<string, number>>> {
+    force: boolean = false,
+  ): Observable<Record<number, Record<string, Assignment>>> {
     if (this.isTargetDate(year, month) && !force) {
       return this.assignmentRecords.asObservable();
     }
+    if (!this.isTargetDate(year, month)) {
+      this.assignmentRecords.next({}); // Clear cache before fetching new data
+    }
     month++; // Adjust month to 1-based index
-    fetch(
-      `${environment.hostname}/api/shift/assignments.php?year=${year}&month=${month}`,
-      {
-        method: 'GET',
-        credentials: getCredentialsHeader(),
-      }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch assignments');
-        }
-        return response.json();
-      })
+    this.cacheAssignements(year, month);
+    return this.assignmentRecords.asObservable();
+  }
+
+  async cacheAssignements(year: number, month: number): Promise<void> {
+    return this.fetchAssignments(year, month)
       .then((data: Assignment[]) => {
         this.assignments.next(data);
         const assignments: Record<
           number,
-          Record<string, number>
+          Record<string, Assignment>
         > = this.assignmentsToRecord(data);
         // Initialize empty records for each user and date in the month
         const daysInMonth = new Date(year, month, 0).getDate();
@@ -61,7 +58,7 @@ export class ShiftService {
           for (let day = 1; day <= daysInMonth; day++) {
             const date = `${year}-${month}-${day}`;
             if (!assignments[user.id][date]) {
-              assignments[user.id][date] = 0;
+              assignments[user.id][date] = this.defaultAssignment(date);
             }
           }
         }
@@ -70,7 +67,21 @@ export class ShiftService {
       .catch((_) => {
         console.error('Error fetching assignments');
       });
-    return this.assignmentRecords.asObservable();
+  }
+
+  async fetchAssignments(year: number, month: number): Promise<Assignment[]> {
+    return fetch(
+      `${environment.hostname}/api/shift/assignments.php?year=${year}&month=${month}`,
+      {
+        method: 'GET',
+        credentials: getCredentialsHeader(),
+      },
+    ).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch assignments');
+      }
+      return response.json();
+    });
   }
 
   async updateAssignment(assignment: Assignment): Promise<void> {
@@ -84,15 +95,48 @@ export class ShiftService {
       body: JSON.stringify(assignment),
     }).then((response) => {
       if (!response.ok) {
-        throw new Error('Failed to update assignment');
+        handleFetchError(response.status);
+      }
+    });
+  }
+
+  async deleteAssignment(assignment: Assignment): Promise<void> {
+    return fetch(`${environment.hostname}/api/shift/assignments.php`, {
+      method: 'DELETE',
+      credentials: getCredentialsHeader(),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(assignment),
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error('Failed to delete assignment');
+      }
+    });
+  }
+
+  async updateAssignmentAttribute(assignment: Assignment): Promise<void> {
+    console.log('Updating assignment attributes:', assignment);
+    return fetch(`${environment.hostname}/api/shift/update_attributes.php`, {
+      method: 'PUT',
+      credentials: getCredentialsHeader(),
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': `${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify(assignment),
+    }).then((response) => {
+      if (!response.ok) {
+        handleFetchError(response.status);
       }
     });
   }
 
   assignmentsToRecord(
-    assignments: Assignment[]
-  ): Record<number, Record<string, number>> {
-    let record: Record<number, Record<string, number>> = {};
+    assignments: Assignment[],
+  ): Record<number, Record<string, Assignment>> {
+    let record: Record<number, Record<string, Assignment>> = {};
     assignments.forEach((assignment) => {
       if (!record[assignment.userId]) {
         record[assignment.userId] = {};
@@ -102,7 +146,7 @@ export class ShiftService {
       let formattedDate = `${date.getFullYear()}-${
         date.getMonth() + 1
       }-${date.getDate()}`;
-      record[assignment.userId][formattedDate] = assignment.shiftId;
+      record[assignment.userId][formattedDate] = assignment;
     });
     return record;
   }
@@ -114,5 +158,15 @@ export class ShiftService {
     const cachedAssignmentDate = this.assignments.getValue()[0].date;
     const targetDate = new Date(cachedAssignmentDate);
     return year === targetDate.getFullYear() && month === targetDate.getMonth();
+  }
+
+  private defaultAssignment(date: string): Assignment {
+    return {
+      userId: 0,
+      date: date,
+      shiftId: 0,
+      isMarkedImportant: false,
+      userComment: '',
+    };
   }
 }

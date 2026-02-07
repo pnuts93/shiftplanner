@@ -31,22 +31,43 @@ export interface ApprovedUser {
 
 export interface ShiftOption {
   id: number;
+  shiftStart?: number;
+  shiftEnd?: number;
   name: string;
-  display: string;
-  isWorking: boolean;
+  displayName: string;
+  maxWorkers: number;
+  minExperiencedWorkers: number;
+  maxExperiencedWorkers: number;
+  isWorkingShift: boolean;
 }
 
 export interface Configuration {
   shifts: ShiftOption[];
   experiencedYearsThreshold: number;
-  maxPeoplePerShift: number;
-  minExpertsPerShift: number;
+  maxMonthOffset: number;
 }
 
 export interface Assignment {
   userId: number;
   date: string;
   shiftId: number;
+  isMarkedImportant: boolean;
+  userComment: string;
+}
+
+export interface AssignmentUpdate {
+  assignment: Assignment;
+  updateType: 'update' | 'comment' | 'important';
+}
+
+export interface CommentDialogData {
+  comment: string;
+  canEdit: boolean;
+}
+
+export interface MonthBlocker {
+  year: number;
+  month: number;
 }
 
 export type RequestState = 'idle' | 'loading' | 'success' | 'error';

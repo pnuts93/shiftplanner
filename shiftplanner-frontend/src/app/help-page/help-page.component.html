@@ -5,25 +5,77 @@
   <h2>{{ "help_page.user_guide.title" | translate }}</h2>
   <h3>{{ "help_page.user_guide.features.dashboard.title" | translate }}</h3>
   <p>{{ "help_page.user_guide.features.dashboard.content" | translate }}</p>
-  <mat-list role="list">
-    @for (shift_option of configuration.shifts; track shift_option) {
-      @if (shift_option.id != 0) {
-        <mat-list-item role="listitem">
-          <span matListItemTitle>{{ shift_option.display }}</span>
-          <mat-icon matListItemIcon>{{
-            getIconForShift(shift_option)
-          }}</mat-icon>
-        </mat-list-item>
-      }
-    }
-  </mat-list>
+  <table mat-table [dataSource]="configuration.shifts" class="shift-table">
+    <ng-container matColumnDef="displayName">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "help_page.shift_name" | translate }}
+      </th>
+      <td mat-cell *matCellDef="let shift">{{ shift.displayName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="icon">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "help_page.is_working" | translate }}
+      </th>
+      <td mat-cell *matCellDef="let shift">
+        <mat-icon>{{ getIconForShift(shift) }}</mat-icon>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="maxWorkers">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "help_page.max_workers" | translate }}
+      </th>
+      <td mat-cell *matCellDef="let shift">{{ shift.maxWorkers }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="minExperiencedWorkers">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "help_page.min_experts" | translate }}
+      </th>
+      <td mat-cell *matCellDef="let shift">
+        {{ shift.minExperiencedWorkers }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="maxExperiencedWorkers">
+      <th mat-header-cell *matHeaderCellDef>
+        {{ "help_page.max_experts" | translate }}
+      </th>
+      <td mat-cell *matCellDef="let shift">
+        {{ shift.maxExperiencedWorkers }}
+      </td>
+    </ng-container>
+
+    <tr
+      mat-header-row
+      *matHeaderRowDef="[
+        'displayName',
+        'icon',
+        'maxWorkers',
+        'minExperiencedWorkers',
+        'maxExperiencedWorkers',
+      ]"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="
+        let row;
+        columns: [
+          'displayName',
+          'icon',
+          'maxWorkers',
+          'minExperiencedWorkers',
+          'maxExperiencedWorkers',
+        ]
+      "
+    ></tr>
+  </table>
   <p>
     {{
       "help_page.user_guide.features.dashboard.rules"
         | translate
           : {
-              min_users: configuration.minExpertsPerShift,
-              max_users: configuration.maxPeoplePerShift,
               min_experience: configuration.experiencedYearsThreshold,
             }
     }}

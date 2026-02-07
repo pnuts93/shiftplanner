@@ -1,0 +1,26 @@
+<h2 mat-dialog-title>{{ "user_dashboard.comment.title" | translate }}</h2>
+<mat-dialog-content>
+  @if (data.canEdit) {
+    <mat-form-field>
+      <mat-label>{{
+        "user_dashboard.comment.placeholder" | translate
+      }}</mat-label>
+      <input matInput [(ngModel)]="data.comment" maxlength="500" />
+    </mat-form-field>
+  } @else {
+    <p>{{ data.comment }}</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button matButton (click)="onNoClick()">
+    {{ "user_dashboard.comment.cancel" | translate }}
+  </button>
+  @if (data.canEdit) {
+    <button matButton (click)="onDeleteClick()">
+      {{ "user_dashboard.comment.delete" | translate }}
+    </button>
+    <button matButton [mat-dialog-close]="data.comment" cdkFocusInitial>
+      {{ "user_dashboard.comment.save" | translate }}
+    </button>
+  }
+</mat-dialog-actions>

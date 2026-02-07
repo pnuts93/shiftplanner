@@ -1,27 +1,32 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Configuration, ShiftOption } from './models';
+import { Observable, ReplaySubject } from 'rxjs';
+import { Configuration } from './models';
 import { environment } from '../environments/environment';
-import { emptyConfig, getCredentialsHeader } from './utils';
+import { getCredentialsHeader } from './utils';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConfigurationService {
-  private configuration: BehaviorSubject<Configuration> =
-    new BehaviorSubject<Configuration>(emptyConfig());
+  private configuration: ReplaySubject<Configuration> =
+    new ReplaySubject<Configuration>(1);
+
+  constructor() {
+    this.fetchConfiguration();
+  }
 
   getConfiguration(): Observable<Configuration> {
-    if (this.configuration.getValue().shifts.length > 0) {
-      return this.configuration.asObservable();
-    }
+    return this.configuration.asObservable();
+  }
+
+  async fetchConfiguration() {
     fetch(`${environment.hostname}/api/config/config.php`, {
       method: 'GET',
       credentials: getCredentialsHeader(),
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error('Failed to fetch shift options');
+          throw new Error('Failed to fetch configuration');
         }
         return response.json();
       })
@@ -31,6 +36,5 @@ export class ConfigurationService {
       .catch((e) => {
         console.error(e);
       });
-    return this.configuration.asObservable();
   }
 }

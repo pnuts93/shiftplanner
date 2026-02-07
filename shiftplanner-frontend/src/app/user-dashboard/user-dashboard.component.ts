@@ -1,5 +1,11 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Assignment, Configuration, ShiftOption, User } from '../models';
+import {
+  Assignment,
+  AssignmentUpdate,
+  Configuration,
+  ShiftOption,
+  User,
+} from '../models';
 import { ShiftService } from '../shift.service';
 import {
   MatDatepicker,
@@ -20,6 +26,8 @@ import { Observable, of } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfigurationService } from '../configuration.service';
 import { emptyConfig } from '../utils';
+import { P } from '@angular/cdk/keycodes';
+import { ConflictError, LockedError } from '../errors';
 
 @Component({
   selector: 'app-user-dashboard',
@@ -40,27 +48,31 @@ import { emptyConfig } from '../utils';
 export class UserDashboardComponent implements OnInit {
   users: User[] = [];
   configuration$: Observable<Configuration> = of(emptyConfig());
-  shiftAssignments$: Observable<Record<number, Record<string, number>>> = of(
-    {}
-  );
+  shiftAssignments$: Observable<Record<number, Record<string, Assignment>>> =
+    of({});
   selectedDate: Date;
   daysInMonth: string[] = [];
   minDate: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  maxDate: Date = new Date(
-    new Date().getFullYear() + 1,
-    new Date().getMonth(),
-    0
-  );
+  maxDate: Date = new Date(new Date().getFullYear(), new Date().getMonth(), 0);
   private snackbar = inject(MatSnackBar);
 
   constructor(
     private configurationService: ConfigurationService,
     private shiftService: ShiftService,
     private translate: TranslateService,
-    private userService: UserService
+    private userService: UserService,
   ) {
     let tmpDate = new Date();
     this.selectedDate = new Date(tmpDate.getFullYear(), tmpDate.getMonth(), 1);
+    this.userService.getUsers().subscribe((users) => (this.users = users));
+    this.configuration$ = this.configurationService.getConfiguration();
+    this.configuration$.subscribe((config) => {
+      this.maxDate = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth() + config.maxMonthOffset,
+        0,
+      );
+    });
   }
 
   ngOnInit() {
@@ -68,7 +80,6 @@ export class UserDashboardComponent implements OnInit {
   }
 
   onMonthSelected(date: Date, datepicker: MatDatepicker<Date>) {
-    console.log('Selected month:', date);
     if (
       date.getMonth() === this.selectedDate.getMonth() &&
       date.getFullYear() === this.selectedDate.getFullYear()
@@ -86,14 +97,12 @@ export class UserDashboardComponent implements OnInit {
       this.selectedDate.getFullYear(),
       this.selectedDate.getMonth(),
     ];
-    this.daysInMonth = this.generateDaysInMonth(year, month);
-    this.userService.getUsers().subscribe((users) => (this.users = users));
-    this.configuration$ = this.configurationService.getConfiguration();
     this.shiftAssignments$ = this.shiftService.getAssignments(
       year,
       month,
-      force
+      force,
     );
+    this.daysInMonth = this.generateDaysInMonth(year, month);
   }
 
   generateDaysInMonth(year: number, month: number): string[] {
@@ -102,14 +111,35 @@ export class UserDashboardComponent implements OnInit {
     return Array.from({ length: days }, (_, i) => `${year}-${month}-${i + 1}`);
   }
 
-  onShiftUpdate(assignment: Assignment) {
-    this.shiftService.updateAssignment(assignment).catch((_) => {
-      this.snackbar.open(
-        this.translate.instant('user_dashboard.update_failed'),
-        undefined,
-        { duration: 3000 }
-      );
+  onShiftUpdate(assignment: AssignmentUpdate) {
+    let messageKey = '';
+    this.triggerAssignmentRequest(assignment).catch((error) => {
+      if (error instanceof ConflictError) {
+        messageKey = 'user_dashboard.update_conflict';
+      } else if (error instanceof LockedError) {
+        messageKey = 'user_dashboard.update_locked';
+      } else {
+        messageKey = 'user_dashboard.update_failed';
+      }
+      this.snackbar.open(this.translate.instant(messageKey), undefined, {
+        duration: 3000,
+      });
       this.loadData(true);
     });
+  }
+
+  async triggerAssignmentRequest(assignment: AssignmentUpdate): Promise<void> {
+    if (assignment.updateType === 'update') {
+      if (assignment.assignment.shiftId === 0) {
+        return this.shiftService.deleteAssignment(assignment.assignment);
+      } else {
+        return this.shiftService.updateAssignment(assignment.assignment);
+      }
+    } else if (
+      assignment.updateType === 'important' ||
+      assignment.updateType === 'comment'
+    ) {
+      return this.shiftService.updateAssignmentAttribute(assignment.assignment);
+    }
   }
 }

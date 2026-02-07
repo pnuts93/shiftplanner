@@ -1,6 +1,33 @@
 <mat-card class="admin-card">
   <mat-card-header>
-    <mat-card-title>{{ "admin.title" | translate }}</mat-card-title>
+    <mat-card-title>{{
+      "admin.month-blocker.title" | translate
+    }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @for (month of availableMonths; track month) {
+      <div class="month-blocker">
+        <p>{{ toDate(month.year, month.month) | date: "MMMM yyyy" }}</p>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="toggleMonthBlocker(month.year, month.month)"
+        >
+          {{
+            isMonthBlocked(month.year, month.month)
+              ? ("admin.month-blocker.unblock" | translate)
+              : ("admin.month-blocker.block" | translate)
+          }}
+        </button>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
+<mat-card class="admin-card">
+  <mat-card-header>
+    <mat-card-title>{{
+      "admin.user-management.title" | translate
+    }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <form [formGroup]="emailForm" (ngSubmit)="addUser()">
@@ -14,7 +41,9 @@
       </mat-form-field>
 
       <mat-checkbox formControlName="isAdmin">Admin</mat-checkbox>
-      <mat-checkbox formControlName="isCounted">Count</mat-checkbox>
+      <mat-checkbox formControlName="isCounted">{{
+        "admin.user-management.is_counted" | translate
+      }}</mat-checkbox>
 
       <button
         mat-raised-button
@@ -29,44 +58,48 @@
     <mat-divider></mat-divider>
 
     @if (allowedUsers$ | async; as allowedUsers) {
-    <div>
-      <div class="user-list-header">
-        <p class="user-email" matListItemTitle>Email</p>
-        <p matListItemLine>Admin</p>
-        <p matListItemLine>Count</p>
-        <p matListItemIcon>Delete</p>
+      <div>
+        <div class="user-list-header">
+          <p class="user-email" matListItemTitle>Email</p>
+          <p matListItemLine>Admin</p>
+          <p matListItemLine>
+            {{ "admin.user-management.is_counted" | translate }}
+          </p>
+          <p matListItemIcon>
+            {{ "admin.user-management.delete" | translate }}
+          </p>
+        </div>
+        @for (user of allowedUsers; track user) {
+          <div class="user-list-item">
+            <p class="user-email" matListItemTitle>{{ user.email }}</p>
+            <mat-slide-toggle
+              [(ngModel)]="user.isAdmin"
+              (change)="toggleAttribute(user)"
+              [disabled]="!canBeRemoved(user)"
+              ngDefaultControl
+              matListItemLine
+            />
+            <mat-slide-toggle
+              [(ngModel)]="user.isCounted"
+              (change)="toggleAttribute(user)"
+              ngDefaultControl
+              matListItemLine
+            />
+            <button
+              class="delete-button"
+              mat-icon-button
+              color="warn"
+              (click)="removeUser(user)"
+              [disabled]="!canBeRemoved(user)"
+              matListItemIcon
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        }
       </div>
-      @for (user of allowedUsers; track user) {
-      <div class="user-list-item">
-        <p class="user-email" matListItemTitle>{{ user.email }}</p>
-        <mat-slide-toggle
-          [(ngModel)]="user.isAdmin"
-          (change)="toggleAttribute(user)"
-          [disabled]="!canBeRemoved(user)"
-          ngDefaultControl
-          matListItemLine
-        />
-        <mat-slide-toggle
-          [(ngModel)]="user.isCounted"
-          (change)="toggleAttribute(user)"
-          ngDefaultControl
-          matListItemLine
-        />
-        <button
-          class="delete-button"
-          mat-icon-button
-          color="warn"
-          (click)="removeUser(user)"
-          [disabled]="!canBeRemoved(user)"
-          matListItemIcon
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      </div>
-      }
-    </div>
     } @else {
-    <p>No allowed users yet.</p>
+      <p>No allowed users yet.</p>
     }
   </mat-card-content>
 </mat-card>

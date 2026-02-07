@@ -57,7 +57,16 @@
         "vacation": "Vacation",
         "none": "- choose option -",
         "n_experienced": "Experienced",
-        "update_failed": "Shift information is out of date. Refreshing 🔁"
+        "update_conflict": "Shift information is out of date. Refreshing 🔁",
+        "update_locked": "Shift is locked",
+        "update_failed": "Failed to update shift",
+        "comment": {
+            "title": "Shift Comment",
+            "placeholder": "Enter your comment here",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "save": "Save"
+        }
     },
     "profile": {
         "title": "Profile",
@@ -65,12 +74,26 @@
         "save": "Save"
     },
     "admin": {
-        "title": "Manage Users",
         "add": "Add",
-        "warning": "Are you sure you want to remove {{email}} from the allowed users?"
+        "warning": "Are you sure you want to remove {{email}} from the allowed users?",
+        "month-blocker": {
+            "title": "Block Months",
+            "block": "Block",
+            "unblock": "Unblock"
+        },
+        "user-management": {
+            "title": "Manage Users",
+            "is_counted": "Count",
+            "delete": "Delete"
+        }
     },
     "help_page": {
         "title": "Help",
+        "shift_name": "Shift Name",
+        "is_working": "Working/Personal",
+        "max_workers": "Max. Workers",
+        "min_experts": "Min. Experienced Workers",
+        "max_experts": "Max. Experienced Workers",
         "introduction": {
             "title": "Introduction",
             "content": "The Shift Planner is a tool developed to facilitate the planning of shift preferences. Users can specify their availability, and administrators can use this information to create shift schedules efficiently."
@@ -80,7 +103,8 @@
             "features": {
                 "dashboard": {
                     "title": "User Dashboard",
-                    "content": "View and manage your shift preferences for the current and upcoming months. Select your preferred shifts and submit them for scheduling. Available shifts:"
+                    "content": "View and manage your shift preferences for the current and upcoming months. Select your preferred shifts and submit them for scheduling. Available shifts:",
+                    "rules": "A user is considered experienced if they have either completed a specialized training or have at least {{min_experience}} years of experience."
                 },
                 "profile": {
                     "title": "Profile",

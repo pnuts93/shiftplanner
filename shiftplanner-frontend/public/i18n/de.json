@@ -57,7 +57,16 @@
         "vacation": "Urlaub",
         "none": "- Option wählen -",
         "n_experienced": "Erfahrene",
-        "update_failed": "Schicht-Informationen sind veraltet. Aktualisiere... 🔁"
+        "update_conflict": "Schicht-Informationen sind veraltet. Aktualisiere... 🔁",
+        "update_locked": "Schicht ist gesperrt",
+        "update_failed": "Schicht-Update fehlgeschlagen",
+        "comment": {
+            "title": "Schicht-Kommentar",
+            "placeholder": "Gib hier deinen Kommentar ein",
+            "delete": "Löschen",
+            "cancel": "Abbrechen",
+            "save": "Speichern"
+        }
     },
     "profile": {
         "title": "Profil",
@@ -65,15 +74,29 @@
         "save": "Speichern"
     },
     "admin": {
-        "title": "Benutzer verwalten",
         "add": "Hinzufügen",
-        "warning": "Sind Sie sicher, dass Sie {{email}} von den erlaubten Benutzern entfernen möchten?"
+        "warning": "Sind Sie sicher, dass Sie {{email}} von den erlaubten Benutzern entfernen möchten?",
+        "month-blocker": {
+            "title": "Monaten sperren",
+            "block": "Sperren",
+            "unblock": "Entsperren"
+        },
+        "user-management": {
+            "title": "Benutzer verwalten",
+            "is_counted": "Gezählt",
+            "delete": "Löschen"
+        }
     },
     "help_page": {
         "title": "Hilfe",
+        "shift_name": "Dienstname",
+        "is_working": "Dienst/Persönlich",
+        "max_workers": "Max. Mitarbeitern",
+        "min_experts": "Min. erfahrenen Mitarbeitern",
+        "max_experts": "Max. erfahrenen Mitarbeitern",
         "introduction": {
             "title": "Einführung",
-            "content": "Der Wunschdienstplaner ist ein Tool, das entwickelt wurde, um die Planung von Dienstwünschen zu erleichtern. Benutzer können ihre Verfügbarkeiten angeben, und Administratoren können diese Informationen nutzen, um Dienstpläne effizient zu erstellen."
+            "content": "Der Wunschdienstplaner ist ein Tool, das entwickelt wurde, um die Planung von Dienstwünschen zu erleichtern. Benutzer können ihre Verfügbarkeiten angeben und Administratoren können diese Informationen nutzen, um Dienstpläne effizient zu erstellen."
         },
         "user_guide": {
             "title": "Benutzerhandbuch",
@@ -81,17 +104,17 @@
                 "dashboard": {
                     "title": "User Dashboard",
                     "content": "Sehen Sie Ihre Schichtpräferenzen für den aktuellen und die kommenden Monate ein und verwalten Sie diese. Wählen Sie Ihre bevorzugten Schichten aus und senden Sie sie zur Dienstplanung ab. Verfügbare Schichten:",
-                    "rules": "In einer Schicht müssen mindestens {{min_users}} Erfahrene Benutzer eingetragen sein. Maximal {{max_users}} Benutzer können sich pro Schicht eintragen. Ein Benutzer wird als Erfahrener Benutzer bezeichnet, wenn er entweder ein Fachweiterbildung gemacht hat, oder wenn er mindestens {{min_experience}} Jahren Erfahrung in der Station hat."
+                    "rules": "Ein Benutzer wird als erfahrener Benutzer bezeichnet, wenn er entweder eine Fachweiterbildung gemacht hat oder wenn er mindestens {{min_experience}} Jahre Erfahrung hat."
                 },
                 "profile": {
                     "title": "Profil",
-                    "content": "Verwalten Sie Ihre persönlichen Informationen und Einstellungen. Aktualisieren Sie Ihre Kontodaten, ändern Sie Ihr Passwort und passen Sie Ihre Benachrichtigungseinstellungen an.",
-                    "rules": "Passwörter müssen mindestens 8 Zeichen lang sein. Aktualisierte Dateien werden gespeichert, sobald Sie auf 'Speichern' klicken."
+                    "content": "Verwalten Sie Ihre persönlichen Informationen und Einstellungen. Aktualisieren Sie Ihre Profildaten, ändern Sie Ihr Passwort und passen Sie Ihre Benachrichtigungseinstellungen an.",
+                    "rules": "Passwörter müssen mindestens 8 Zeichen lang sein. Aktualisierte Daten werden gespeichert, sobald Sie auf 'Speichern' klicken."
                 },
                 "security": {
                     "title": "Allgemeine Sicherheitsinformationen",
-                    "content": "Die App ist durch den folgenden Massnahmen gesichert: Email-Bestätigung bei der Registrierung, sichere Passwortspeicherung mittels Hashing und Salting, HTTPS-Verschlüsselung für alle Datenübertragungen, maximale Login-Versuche um Brute-Force-Angriffe zu verhindern, sowie Passwort Reset-Funktionalität.",
-                    "rules": "Ihres Profil wird nach 3 fehlgeschlagenen Login-Versuchen gesperrt: danach werden Sie per Email angefragt, ob Sie dafür verantwortlich sind. Wenn nicht wird die IP-Adresse des Täters auf eine Blacklist gesetzt. Um Ihres Profil zu entsperren, müssen Sie auf einen Link in der Email klicken."
+                    "content": "Die App ist durch die folgenden Massnahmen gesichert: Email-Bestätigung bei der Registrierung, sichere Passwortspeicherung mittels Hashing und Salting, HTTPS-Verschlüsselung für alle Datenübertragungen, maximale Login-Versuche um Brute-Force-Angriffe zu verhindern, sowie Passwort Reset-Funktionalität.",
+                    "rules": "Ihr Profil wird nach 3 fehlgeschlagenen Login-Versuchen gesperrt: danach werden Sie per Email angefragt, ob Sie dafür verantwortlich sind. Wenn nicht wird die IP-Adresse des Täters auf eine Blacklist gesetzt. Um Ihr Profil zu entsperren, müssen Sie auf einen Link in der Email klicken."
                 }
             }
         },
@@ -101,12 +124,12 @@
                 "dashboard": {
                     "title": "User Dashboard",
                     "content": "Als Administrator können Sie Dienstwünsche einsehen und verwalten. Benutzer werden benachrichtigt, wenn Sie deren Dienstwünsche anpassen.",
-                    "rules": "Die Regeln in der Benutzerhandbuch-Sektion gelten auch hier."
+                    "rules": "Die Regeln aus der Benutzerhandbuch-Sektion gelten auch hier."
                 },
                 "admin-dashboard": {
                     "title": "Admin Dashboard",
                     "content": "Als Administrator können Sie Benutzer verwalten. Fügen Sie autorisierte Benutzer hinzu oder entfernen Sie diese.",
-                    "rules": "Um neue Benutzer sich registrieren zu lassen, müssen Sie deren Email-Adressen zur Liste der autorisierten Benutzer hinzufügen. Da können Sie sich entscheiden, ob der Benutzer ein Administrator ist, sowie ob der Benutzer gezählt wird, wenn die Anzahl der Benutzer in einer Schicht gerechnet wird. Ein Administrator kann nur normale Benutzer löschen, nicht andere Administratoren. Ein Administrator kann nur sich selbst zu einem normalen Benutzer machen, und das darf passieren, wenn es mindestens einen anderen Administrator gibt."
+                    "rules": "Bevor sich neue Benutzer registrieren können, müssen Sie deren Email-Adressen zur Liste der autorisierten Benutzer hinzufügen. Danach können Sie sich entscheiden, ob der Benutzer ein Administrator ist sowie ob der Benutzer mitgezählt werden soll. Ein Administrator kann nur normale Benutzer löschen, nicht andere Administratoren. Ein Administrator kann nur sich selbst zu einem normalen Benutzer machen.Es muss mindestens einen anderen Administrator geben."
                 }
             }
         }
