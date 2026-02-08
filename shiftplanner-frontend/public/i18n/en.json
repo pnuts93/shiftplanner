@@ -33,7 +33,7 @@
         "password_reset": {
             "title": "Reset Password",
             "send_button": "Send Reset Link",
-            "success": "Reset link sent to your email",
+            "success": "Reset link sent to your email, if an account with this email exists",
             "error": "Error sending reset link. Please try again later"
         },
         "email_confirmation": {

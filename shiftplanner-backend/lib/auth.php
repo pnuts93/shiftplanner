@@ -14,6 +14,12 @@ function verify_method(array $allowed_methods)
 function create_otp($conn, $user_id, $token_type)
 {
     $otp = bin2hex(random_bytes(16));
+    # Create a new OTP entry if no other OTPs of the same type exist for the user
+    $stmt = $conn->prepare("SELECT * FROM one_time_tokens WHERE user_id = :user_id AND token_type = :token_type AND expires_at > NOW()");
+    $stmt->execute([':user_id' => $user_id, ':token_type' => $token_type]);
+    if ($stmt->rowCount() > 0) {
+        return null; # Only one active OTP of the same type is allowed per user
+    }
     $stmt = $conn->prepare("INSERT INTO one_time_tokens (token, user_id, expires_at, token_type) VALUES (:otp, :user_id, NOW() + INTERVAL '30 MINUTES', :token_type)");
     $stmt->execute([':otp' => $otp, ':user_id' => $user_id, ':token_type' => $token_type]);
     return $otp;

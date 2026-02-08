@@ -33,7 +33,7 @@
         "password_reset": {
             "title": "Passwort zurücksetzen",
             "send_button": "Reset-Link senden",
-            "success": "Reset-Link wurde an deine Email gesendet",
+            "success": "Reset-Link wurde an deine Email gesendet, falls ein Konto mit dieser Email existiert",
             "error": "Fehler beim Senden des Reset-Links. Bitte versuche es später erneut"
         },
         "email_confirmation": {

@@ -20,6 +20,7 @@ DEFAULT_LOCALE=
 
 session.use_cookies=1
 session.use_only_cookies=1
+session.use_strict_mode=1
 session.cookie_lifetime=0
 session.cookie_path="/"
 session.cookie_domain=

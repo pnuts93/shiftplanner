@@ -57,7 +57,7 @@ function create_month_blocker()
     $year = intval($data['year']);
     $month = intval($data['month']);
 
-    if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN']) {
+    if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN'] || $_SESSION['role'] !== 'admin') {
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden']);
         exit;
@@ -87,7 +87,7 @@ function delete_month_blocker()
     $year = intval($data['year']);
     $month = intval($data['month']);
 
-    if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN']) {
+    if ($_SESSION['token'] !== $_SERVER['HTTP_X_CSRF_TOKEN'] || $_SESSION['role'] !== 'admin') {
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden']);
         exit;

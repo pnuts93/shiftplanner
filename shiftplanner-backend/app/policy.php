@@ -12,7 +12,7 @@ if (!$locale) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo $locale; ?>">
+<html lang="<?php echo htmlspecialchars($locale); ?>">
 
 <head>
     <meta charset="UTF-8">

@@ -8,11 +8,17 @@ require __DIR__ . '/../PHPMailer/src/Exception.php';
 require __DIR__ . '/../PHPMailer/src/PHPMailer.php';
 require __DIR__ . '/../PHPMailer/src/SMTP.php';
 
+$allowed_locales = ['en', 'de'];
 
 function prepare_email_confirmation($otp, $email, $first_name, $config)
 {
+    global $allowed_locales;
+
     $subject = "Email Confirmation";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
+    if (!in_array($locale, $allowed_locales, true)) {
+        $locale = 'en';
+    }
     $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/confirm_email.html");
     if ($message === false) {
         $message = file_get_contents(__DIR__ . "/templates/en/confirm_email.html");
@@ -32,8 +38,12 @@ function prepare_email_confirmation($otp, $email, $first_name, $config)
 
 function prepare_forgot_password($otp, $email, $config)
 {
+    global $allowed_locales;
     $subject = "Reset Password";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
+    if (!in_array($locale, $allowed_locales, true)) {
+        $locale = 'en';
+    }
     $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/forgot_password.html");
     $link = "https://" .  $config["DOMAIN"] . "/app/reset-password.php?otp=" . urlencode($otp);
     $message = str_replace(
@@ -50,8 +60,12 @@ function prepare_forgot_password($otp, $email, $config)
 
 function prepare_max_retries($to, $config, $uuid)
 {
+    global $allowed_locales;
     $subject = "Too Many Login Attempts";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
+    if (!in_array($locale, $allowed_locales, true)) {
+        $locale = 'en';
+    }
     $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/max_retries.html");
     if ($message === false) {
         $message = file_get_contents(__DIR__ . "/templates/en/max_retries.html");
@@ -70,6 +84,10 @@ function prepare_max_retries($to, $config, $uuid)
 
 function prepare_shift_change_notification($to, $locale, $shift_date, $shift_type, $config)
 {
+    global $allowed_locales;
+    if (!in_array($locale, $allowed_locales, true)) {
+        $locale = 'en';
+    }
     $subject = "Shift Assignment Notification";
     $locale = $config["DEFAULT_LOCALE"] ?? "en";
     $message = file_get_contents(__DIR__ . "/templates/" . $locale . "/shift_assignment.html");
@@ -95,7 +113,7 @@ function send_email($to, $subject, $message, $config)
     $mail = new PHPMailer(true);
 
     try {
-        $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+        $mail->SMTPDebug = ($config["ENV"] === "dev") ? SMTP::DEBUG_SERVER : SMTP::DEBUG_OFF;
         $mail->isSMTP();
         $mail->Host =  $config["SMTP_HOST"];
         $mail->SMTPAuth = true;
