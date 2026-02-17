@@ -269,7 +269,7 @@ export class UserShiftTableComponent implements OnChanges {
       date.lastIndexOf('-'),
     );
     let dayIndex: number = +date.substring(date.lastIndexOf('-') + 1);
-    return new Date(yearIndex, monthIndex, dayIndex);
+    return new Date(yearIndex, monthIndex - 1, dayIndex);
   }
 
   onOpenShiftOption(user: User, date: string): void {
